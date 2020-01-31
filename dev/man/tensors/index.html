@@ -1,2 +1,654 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tensors and the TensorMap type · TensorKit.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TensorKit.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../intro/">Introduction</a></li><li><a class="tocitem" href="../tutorial/">Tutorial</a></li><li><a class="tocitem" href="../categories/">Optional introduction to category theory</a></li><li><a class="tocitem" href="../spaces/">Vector spaces</a></li><li><a class="tocitem" href="../sectors/">Sectors, representation spaces and fusion trees</a></li><li class="is-active"><a class="tocitem" href>Tensors and the <code>TensorMap</code> type</a><ul class="internal"><li><a class="tocitem" href="#Storage-of-tensor-data-1"><span>Storage of tensor data</span></a></li><li><a class="tocitem" href="#Defining-and-constructing-tensor-maps-1"><span>Defining and constructing tensor maps</span></a></li><li><a class="tocitem" href="#Storage-1"><span>Storage</span></a></li><li><a class="tocitem" href="#Linear-algebra-operations-1"><span>Linear algebra operations</span></a></li><li><a class="tocitem" href="#Index-manipulations-1"><span>Index manipulations</span></a></li><li><a class="tocitem" href="#Tensor-contractions-and-tensor-networks-1"><span>Tensor contractions and tensor networks</span></a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/spaces/">Vector spaces, symmetry sectors an fusion trees</a></li></ul></li><li><span class="tocitem">Index</span><ul><li><a class="tocitem" href="../../index/">Index</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Tensors and the <code>TensorMap</code> type</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tensors and the <code>TensorMap</code> type</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/Jutho/TensorKit.jl/blob/master/docs/src/man/tensors.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="s_tensors-1"><a class="docs-heading-anchor" href="#s_tensors-1">Tensors and the <code>TensorMap</code> type</a><a class="docs-heading-anchor-permalink" href="#s_tensors-1" title="Permalink"></a></h1><p>This last page explains how to create and manipulate tensors in TensorKit.jl. As this is probably the most important part of the manual, we will also focus more strongly on the usage and interface, and less so on the underlying implementation. The only aspect of the implementation that we will address is the storage of the tensor data, as this is important to know how to create and initialize a tensor, but will in fact also shed light on how some of the methods work.</p><p>As mentioned, all tensors in TensorKit.jl are interpreted as linear maps (morphisms) from a domain (a <code>ProductSpace{S,N₂}</code>) to a domain (another <code>ProductSpace{S,N₁}</code>), with the same <code>S&lt;:ElementarySpace</code> that labels the type of spaces associated with the individual tensor indices. The overall type for all such tensor maps is <code>AbstractTensorMap{S, N₁, N₂}</code>. Note that we place information about the codomain before that of the domain. Indeed, we have already encountered the constructor for the concrete parametric type <code>TensorMap</code> in the form <code>TensorMap(..., codomain, domain)</code>. This convention is opposite to the mathematical notation, e.g. <span>$\mathrm{Hom}(W,V)$</span> or <span>$f:W→V$</span>, but originates from the fact that a normal matrix is also denoted as having size <code>m × n</code> or is constructed in Julia as <code>Array(..., (m, n))</code>, where the first integer <code>m</code> refers to the codomain being <code>m</code>- dimensional, and the seond integer <code>n</code> to the domain being <code>n</code>-dimensional. This also explains why we have consistently used the symbol <span>$W$</span> for spaces in the domain and <span>$V$</span> for spaces in the codomain. A tensor map <span>$t:(W₁ ⊗ … ⊗ W_{N₂}) → (V₁ ⊗ … ⊗ V_{N₁})$</span> will be created in Julia as <code>TensorMap(..., V1 ⊗ ... ⊗ VN₁, W1 ⊗ ... ⊗ WN2)</code>.</p><p>Furthermore, the abstract type <code>AbstractTensor{S,N}</code> is just a synonym for <code>AbstractTensorMap{S,N,0}</code>, i.e. for tensor maps with an empty domain, which is equivalent to the unit of the monoidal category, or thus, the field of scalars <span>$𝕜$</span>.</p><p>Currently, <code>AbstractTensorMap</code> has two subtypes. <code>TensorMap</code> provides the actual implementation, where the data of the tensor is stored in a <code>DenseArray</code> (more specifically a <code>DenseMatrix</code> as will be explained below). <code>AdjointTensorMap</code> is a simple wrapper type to denote the adjoint of an existing <code>TensorMap</code> object. In the future, additional types could be defined, to deal with sparse data, static data, diagonal data, etc...</p><h2 id="Storage-of-tensor-data-1"><a class="docs-heading-anchor" href="#Storage-of-tensor-data-1">Storage of tensor data</a><a class="docs-heading-anchor-permalink" href="#Storage-of-tensor-data-1" title="Permalink"></a></h2><p>Before discussion how to construct and initalize a <code>TensorMap{S}</code>, let us discuss what is meant by &#39;tensor data&#39; and how it can efficiently and compactly be stored. Let us first discuss the case <code>sectortype(S) == Trivial</code> sector, i.e. the case of no symmetries. In that case the data of a tensor <code>t = TensorMap(..., V1 ⊗ ... ⊗ VN₁, W1 ⊗ ... ⊗ WN2)</code> can just be represented as a multidimensional array of size</p><p><code>(dim(V1), dim(V2), …, dim(VN₁), dim(W1), …, dim(WN₂))</code></p><p>which can also be reshaped into matrix of size</p><p><code>(dim(V1)*dim(V2)*…*dim(VN₁), dim(W1)*dim(W2)*…*dim(WN₂))</code></p><p>and is really the matrix representation of the linear map that the tensor represents. In particular, given a second tensor <code>t2</code> whose domain matches with the codomain of <code>t</code>, function composition amounts to multiplication of their corresponding data matrices. Similarly, tensor factorizations such as the singular value decomposition, which we discuss below, can act directly on this matrix representation.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>One might wonder if it would not have been more natural to represent the tensor data as <code>(dim(V1), dim(V2), …, dim(VN₁), dim(WN₂), …, dim(W1))</code> given how employing the duality naturally reverses the tensor product, as encountered with the interface of <a href="man/@ref"><code>repartition</code></a> for <a href="../sectors/#ss_fusiontrees-1">fusion trees</a>. However, such a representation, when plainly <code>reshape</code>d to a matrix, would not have the above properties and would thus not constitute the matrix representation of the tensor in a compatible basis.</p></div></div><p>Now consider the case where <code>sectortype(S) == G</code> for some <code>G</code> which has <code>FusionStyle(G) == Abelian()</code>, i.e. the representations of an Abelian group, e.g. <code>G == ℤ₂</code> or <code>G == U₁</code>. In this case, the tensor data is associated with sectors <code>(a1, a2, …, aN₁) ∈ sectors(V1 ⊗ V2 ⊗ … ⊗ VN₁)</code> and <code>(b1, …, bN₂) ∈ sectors(W1 ⊗ … ⊗ WN₂)</code> such that they fuse to a same common charge, i.e. <code>(c = first(⊗(a1, …, aN₁))) == first(⊗(b1, …, bN₂))</code>. The data associated with this takes the form of a multidimensional array with size <code>(dim(V1, a1), …, dim(VN₁, aN₁), dim(W1, b1), …, dim(WN₂, bN₂))</code>, or equivalently, a matrix of with row size <code>dim(V1, a1)*…*dim(VN₁, aN₁) == dim(codomain, (a1, …, aN₁))</code> and column size <code>dim(W1, b1)*…*dim(WN₂, aN₂) == dim(domain, (b1, …, bN₂))</code>.</p><p>However, there are multiple combinations of <code>(a1, …, aN₁)</code> giving rise to the same <code>c</code>, and so there is data associated with all of these, as well as all possible combinations of <code>(b1, …, bN₂)</code>. Stacking all matrices for different <code>(a1,…)</code> and a fixed value of <code>(b1,…)</code> underneath each other, and for fixed value of <code>(a1,…)</code> and different values of <code>(b1,…)</code> next to each other, gives rise to a larger block matrix of all data associated with the central sector <code>c</code>. The size of this matrix is exactly <code>(blockdim(codomain, c), blockdim(domain, c))</code> and these matrices are exactly the diagonal blocks whose existence is guaranteed by Schur&#39;s lemma, and which are labeled by the coupled sector <code>c</code>. Indeed, if we would represent the tensor map <code>t</code> as a matrix without explicitly using the symmetries, we could reorder the rows and columns to group data corresponding to sectors that fuse to the same <code>c</code>, and the resulting block diagonal representation would emerge. This basis transform is thus a permutation, which is a unitary operation, that will cancel or go through trivially for linear algebra operations such as composing tensor maps (matrix multiplication) or tensor factorizations such as a singular value decomposition. For such linear algebra operations, we can thus directly act on these large matrices, which correspond to the diagonal blocks that emerge after a basis transform, provided that the partition of the tensor indices in domain and codomain of the tensor are in line with our needs. For example, composing two tensor maps amounts to multiplying the matrices corresponding to the same <code>c</code> (provided that its subblocks labeled by the different combinations of sectors are ordered in the same way, which we guarantee by associating a canonical order with sectors). Henceforth, we refer to the <code>blocks</code> of a tensor map as those diagonal blocks, the existence of which is provided by Schur&#39;s lemma and which are labeled by the coupled sectors <code>c</code>. We directly store these blocks as <code>DenseMatrix</code> and gather them as values in a dictionary, together with the corresponding coupled sector <code>c</code> as key. For a given tensor <code>t</code>, we can access a specific block as <code>block(t, c)</code>, whereas <code>blocks(t)</code> yields an iterator over pairs <code>c=&gt;block(t,c)</code>.</p><p>The subblocks corresponding to a particular combination of sectors then correspond to a particular view for some range of the rows and some range of the colums, i.e. <code>view(block(t, c), m₁:m₂, n₁:n₂)</code> where the ranges <code>m₁:m₂</code> associated with <code>(a1, …, aN₁)</code> and <code>n₁:n₂</code> associated with <code>(b₁, …, bN₂)</code> are stored within the fields of the instance <code>t</code> of type <code>TensorMap</code>. This <code>view</code> can then lazily be reshaped to a multidimensional array, for which we rely on the package <a href="https://github.com/Jutho/Strided.jl">Strided.jl</a>. Indeed, the data in this <code>view</code> is not contiguous, because the stride between the different columns is larger than the length of the columns. Nonetheless, this does not pose a problem and even as multidimensional array there is still a definite stride associated with each dimension.</p><p>When <code>FusionStyle(G) isa NonAbelian</code>, things become slightly more complicated. Not only do <code>(a1, …, aN₁)</code> give rise to different coupled sectors <code>c</code>, there can be multiply ways in which they fuse to <code>c</code>. These different possibilities are enumerated by the iterator <code>fusiontrees((a1, …, aN₁), c)</code> and <code>fusiontrees((b1, …, bN₂), c)</code>, and with each of those, there is tensor data that takes the form of a multidimensional array, or, after reshaping, a matrix of size <code>(dim(codomain, (a1, …, aN₁)), dim(domain, (b1, …, bN₂))))</code>. Again, we can stack all such matrices with the same value of <code>f₁ ∈ fusiontrees((a1, …, aN₁), c)</code> horizontally (as they all have the same number of rows), and with the same value of <code>f₂ ∈ fusiontrees((b1, …, bN₂), c)</code> vertically (as they have the same number of columns). What emerges is a large matrix of size <code>(blockdim(codomain, c), blockdim(domain, c))</code> containing all the tensor data associated with the coupled sector <code>c</code>, where <code>blockdim(P, c) = sum(dim(P, s)*length(fusiontrees(s, c)) for s in sectors(P))</code> for some instance <code>P</code> of <code>ProductSpace</code>.</p><p>The tensor implementation does not distinguish between abelian or non-abelian sectors and still stores these matrices as a <code>DenseMatrix</code>, accessible via <code>block(t, c)</code>. At first sight, it might now be less clear what the relevance of this block is in relation to the full matrix representation of the tensor map, where the symmetry is not exploited. The essential interpretation is still the same. Schur&#39;s lemma now tells that there is a unitary basis transform which makes this matrix representation block diagonal, more specifically, of the form <span>$⨁_{c} B_c ⊗ 𝟙_{c}$</span>, where <span>$B_c$</span> denotes <code>block(t,c)</code> and <span>$𝟙_{c}$</span> is an identity matrix of size <code>(dim(c), dim(c))</code>. The reason for this extra identity is that the group representation is recoupled to act as <span>$⨁_{c} 𝟙 ⊗ u_c(g)$</span> for all <span>$g ∈ \mathsf{G}$</span>, with <span>$u_c(g)$</span> the matrix representation of group element <span>$g$</span> according to the irrep <span>$c$</span>. In the abelian case, <code>dim(c) == 1</code>, i.e. all irreducible representations are one-dimensional and Schur&#39;s lemma only dictates that all off-diagonal blocks are zero. However, in this case the basis transform to the block diagonal representation is not simply a permutation matrix, but a more general unitary matrix composed of the different fusion trees. Indeed, let us denote the fusion trees <code>f₁ ∈ fusiontrees((a1, …, aN₁), c)</code> as <span>$X^{a_1, …, a_{N₁}}_{c,α}$</span> where <span>$α = (e_1, …, e_{N_1-2}; μ₁, …, μ_{N_1-1})$</span> is a collective label for the internal sectors <code>e</code> and the vertex degeneracy labels <code>μ</code> of a generic fusion tree, as discussed in the <a href="../sectors/#ss_fusiontrees-1">corresponding section</a>. The tensor is then represented as</p><p><img src="../img/tensor-storage.svg" alt="tensor storage"/></p><p>In this diagram, we have indicated how the tensor map can be rewritten in terms of a block diagonal matrix with a unitary matrix on its left and another unitary matrix (if domain and codomain are different) on its right. So the left and right matrices should actually have been drawn as squares. They represent the unitary basis transform. In this picture, red and white regions are zero. The center matrix is most easy to interpret. It is the block diagonal matrix <span>$⨁_{c} B_c ⊗ 𝟙_{c}$</span> with diagonal blocks labeled by the coupled charge <code>c</code>, in this case it takes two values. Every single small square corresponds to a single element of <span>$B_c$</span>, tensored with the identity of size <span>$d_c$</span>. Instead of <span>$B_c$</span>, a more accurate labelling is <span>$t^c_{(a_1 … a_{N₁})α, (b_1 … b_{N₂}β)}$</span> where <span>$α$</span> labels different fusion trees from <span>$(a_1 … a_{N₁})$</span> to <span>$c$</span>. The dashed lines indicate regions corresponding to different fusion trees, either because of different sectors <span>$(a_1 … a_{N₁})$</span> or different labels <span>$α$</span> within the same sector.</p><p>To understand this better, we need to understand the basis transform, e.g. on the left (codomain) side. In more detail, it is given by</p><p><img src="../img/tensor-unitary.svg" alt="tensor unitary"/></p><p>Indeed, remembering that <span>$V_i = ⨁_{a_i} R_{a_i} ⊗ ℂ^{n_{a_i}}$</span> with <span>$R_{a_i}$</span> the representation space on which irrep <span>$a_i$</span> acts (with dimension <span>$\mathrm{dim}(a_i)$</span>), we find <span>$V_1 ⊗ … ⊗ V_{N_1} = ⨁_{a_1, …, a_{N₁}} (R_{a_1} ⊗ … ⊗ R_{a_{N_1}}) ⊗ ℂ^{n_{a_1} × … n_{a_{N_1}}}$</span>. In the diagram above, the wiggly lines correspond to the direct sum over the different sectors <span>$(a_1, …, a_{N₁})$</span>, there depicted taking three possible values <span>$(a…)$</span>, <span>$(a…)′$</span> and <span>$(a…)′′$</span>. The tensor product <span>$(R_{a_1} ⊗ … ⊗ R_{a_{N_1}}) ⊗ ℂ^{n_{a_1} × … n_{a_{N_1}}}$</span> is depicted as <span>$(R_{a_1} ⊗ … ⊗ R_{a_{N_1}})^{⊕ n_{a_1} × … n_{a_{N_1}}}$</span>, i.e. as a direct sum of the spaces <span>$R_{(a…)} = (R_{a_1} ⊗ … ⊗ R_{a_{N_1}})$</span> according to the dotted horizontal lines, which repeat <span>$n_{(a…)} = n_{a_1} × … n_{a_{N_1}}$</span> times. In this particular example, <span>$n_{(a…)}=2$</span>, <span>$n_{(a…)&#39;}=3$</span> and <span>$n_{(a…)&#39;&#39;}=5$</span>. The thick vertical line represents the separation between the two different coupled sectors, denoted as <span>$c$</span> and <span>$c&#39;$</span>. Dashed vertical lines represent different ways of reaching the coupled sector, corresponding to different <code>α</code>. In this example, the first sector <span>$(a…)$</span> has one fusion tree to <span>$c$</span>, labeled by <span>$c,α$</span>, and two fusion trees to <span>$c&#39;$</span>, labeled by <span>$c&#39;,α$</span> and <span>$c&#39;,α&#39;$</span>. The second sector has only a fusion tree to <span>$c$</span>, labeled by <span>$c,α&#39;$</span>. The third sector only has a fusion tree to <span>$c&#39;$</span>, labeld by <span>$c&#39;, α&#39;&#39;$</span>. Finally then, because the fusion trees do not act on the spaces <span>$ℂ^{n_{a_1} × … n_{a_{N_1}}}$</span>, the dotted lines which represent the different <span>$n_{(a…)} = n_{a_1} × … n_{a_{N_1}}$</span> dimensions are also drawn vertically. In particular, for a given sector <span>$(a…)$</span> and a specific fusion tree <span>$X^{(a…)}_{c,α}: R_{(a…)}→R_c$</span>, the action is <span>$X^{(a…)}_{c,α} ⊗ 𝟙_{n_{(a…)}}$</span>, which corresponds to the diagonal blocks in this drawing where the same matrix <span>$X^{(a…)}_{c,α}$</span> (the fusion tree) is repeated along the diagonal. A similar interpretation can be given to the basis transform on the right, by taking its adjoint. In this particular example, it has two different combinations of sectors <span>$(b…)$</span> and <span>$(b…)&#39;$</span>, where both have a single fusion tree to <code>c</code> as well as to <code>c&#39;</code>, and <span>$n_{(b…)}=2$</span>, <span>$n_{(b…)&#39;}=3$</span>.</p><h2 id="Defining-and-constructing-tensor-maps-1"><a class="docs-heading-anchor" href="#Defining-and-constructing-tensor-maps-1">Defining and constructing tensor maps</a><a class="docs-heading-anchor-permalink" href="#Defining-and-constructing-tensor-maps-1" title="Permalink"></a></h2><p>The most convenient set of constructors are those that construct tensors or tensor maps with random or uninitialized data. They take the form</p><p><code>TensorMap(f, codomain, domain)</code></p><p><code>TensorMap(f, eltype::Type{&lt;:Number}, codomain, domain)</code></p><p><code>TensorMap(undef, codomain, domain)</code></p><p><code>TensorMap(undef, eltype::Type{&lt;:Number}, codomain, domain)</code></p><p>Here, in the first form, <code>f</code> can be any function or object that is called with an argument of type <code>Dims{2} = Tuple{Int,Int}</code> and is such that <code>f((m,n))</code> creates a <code>DenseMatrix</code> instance with <code>size(f(m,n)) == (m,n)</code>. In the second form, <code>f</code> is called as <code>f(eltype,(m,n))</code>. Possibilities for <code>f</code> are <code>randn</code> and <code>rand</code> from Julia Base. TensorKit.jl provides <code>randnormal</code> and <code>randuniform</code> as an synonym for <code>randn</code> and <code>rand</code>, as well as the new function  <code>randisometry</code>, alternatively called <code>randhaar</code>, that creates a random isometric <code>m × n</code> matrix <code>w</code> satisfying <code>w&#39;*w ≈ I</code> distributed according to the Haar measure (this requires <code>m&gt;= n</code>). The third and fourth calling syntax use the <code>UndefInitializer</code> from Julia Base and generates a <code>TensorMap</code> with unitialized data, which could thus contain <code>NaN</code>s.</p><h2 id="Storage-1"><a class="docs-heading-anchor" href="#Storage-1">Storage</a><a class="docs-heading-anchor-permalink" href="#Storage-1" title="Permalink"></a></h2><p>TODO</p><h2 id="Linear-algebra-operations-1"><a class="docs-heading-anchor" href="#Linear-algebra-operations-1">Linear algebra operations</a><a class="docs-heading-anchor-permalink" href="#Linear-algebra-operations-1" title="Permalink"></a></h2><p>TODO</p><h2 id="Index-manipulations-1"><a class="docs-heading-anchor" href="#Index-manipulations-1">Index manipulations</a><a class="docs-heading-anchor-permalink" href="#Index-manipulations-1" title="Permalink"></a></h2><p>TODO</p><h2 id="Tensor-contractions-and-tensor-networks-1"><a class="docs-heading-anchor" href="#Tensor-contractions-and-tensor-networks-1">Tensor contractions and tensor networks</a><a class="docs-heading-anchor-permalink" href="#Tensor-contractions-and-tensor-networks-1" title="Permalink"></a></h2><p>TODO</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../sectors/">« Sectors, representation spaces and fusion trees</a><a class="docs-footer-nextpage" href="../../lib/spaces/">Vector spaces, symmetry sectors an fusion trees »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 31 January 2020 01:38">Friday 31 January 2020</span>. Using Julia version 1.0.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tensors and the TensorMap type · TensorKit.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TensorKit.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../intro/">Introduction</a></li><li><a class="tocitem" href="../tutorial/">Tutorial</a></li><li><a class="tocitem" href="../categories/">Optional introduction to category theory</a></li><li><a class="tocitem" href="../spaces/">Vector spaces</a></li><li><a class="tocitem" href="../sectors/">Sectors, representation spaces and fusion trees</a></li><li class="is-active"><a class="tocitem" href>Tensors and the <code>TensorMap</code> type</a><ul class="internal"><li><a class="tocitem" href="#Storage-of-tensor-data-1"><span>Storage of tensor data</span></a></li><li><a class="tocitem" href="#Constructing-tensor-maps-and-accessing-tensor-data-1"><span>Constructing tensor maps and accessing tensor data</span></a></li><li><a class="tocitem" href="#Index-manipulations-1"><span>Index manipulations</span></a></li><li><a class="tocitem" href="#Linear-algebra-operations-1"><span>Linear algebra operations</span></a></li><li><a class="tocitem" href="#Tensor-contractions-and-tensor-networks-1"><span>Tensor contractions and tensor networks</span></a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/spaces/">Vector spaces, symmetry sectors an fusion trees</a></li></ul></li><li><span class="tocitem">Index</span><ul><li><a class="tocitem" href="../../index/">Index</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Tensors and the <code>TensorMap</code> type</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tensors and the <code>TensorMap</code> type</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/Jutho/TensorKit.jl/blob/master/docs/src/man/tensors.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="s_tensors-1"><a class="docs-heading-anchor" href="#s_tensors-1">Tensors and the <code>TensorMap</code> type</a><a class="docs-heading-anchor-permalink" href="#s_tensors-1" title="Permalink"></a></h1><p>This last page explains how to create and manipulate tensors in TensorKit.jl. As this is probably the most important part of the manual, we will also focus more strongly on the usage and interface, and less so on the underlying implementation. The only aspect of the implementation that we will address is the storage of the tensor data, as this is important to know how to create and initialize a tensor, but will in fact also shed light on how some of the methods work.</p><p>As mentioned, all tensors in TensorKit.jl are interpreted as linear maps (morphisms) from a domain (a <code>ProductSpace{S,N₂}</code>) to a domain (another <code>ProductSpace{S,N₁}</code>), with the same <code>S&lt;:ElementarySpace</code> that labels the type of spaces associated with the individual tensor indices. The overall type for all such tensor maps is <code>AbstractTensorMap{S, N₁, N₂}</code>. Note that we place information about the codomain before that of the domain. Indeed, we have already encountered the constructor for the concrete parametric type <code>TensorMap</code> in the form <code>TensorMap(..., codomain, domain)</code>. This convention is opposite to the mathematical notation, e.g. <span>$\mathrm{Hom}(W,V)$</span> or <span>$f:W→V$</span>, but originates from the fact that a normal matrix is also denoted as having size <code>m × n</code> or is constructed in Julia as <code>Array(..., (m, n))</code>, where the first integer <code>m</code> refers to the codomain being <code>m</code>- dimensional, and the seond integer <code>n</code> to the domain being <code>n</code>-dimensional. This also explains why we have consistently used the symbol <span>$W$</span> for spaces in the domain and <span>$V$</span> for spaces in the codomain. A tensor map <span>$t:(W₁ ⊗ … ⊗ W_{N₂}) → (V₁ ⊗ … ⊗ V_{N₁})$</span> will be created in Julia as <code>TensorMap(..., V1 ⊗ ... ⊗ VN₁, W1 ⊗ ... ⊗ WN2)</code>.</p><p>Furthermore, the abstract type <code>AbstractTensor{S,N}</code> is just a synonym for <code>AbstractTensorMap{S,N,0}</code>, i.e. for tensor maps with an empty domain, which is equivalent to the unit of the monoidal category, or thus, the field of scalars <span>$𝕜$</span>.</p><p>Currently, <code>AbstractTensorMap</code> has two subtypes. <code>TensorMap</code> provides the actual implementation, where the data of the tensor is stored in a <code>DenseArray</code> (more specifically a <code>DenseMatrix</code> as will be explained below). <code>AdjointTensorMap</code> is a simple wrapper type to denote the adjoint of an existing <code>TensorMap</code> object. In the future, additional types could be defined, to deal with sparse data, static data, diagonal data, etc...</p><h2 id="Storage-of-tensor-data-1"><a class="docs-heading-anchor" href="#Storage-of-tensor-data-1">Storage of tensor data</a><a class="docs-heading-anchor-permalink" href="#Storage-of-tensor-data-1" title="Permalink"></a></h2><p>Before discussion how to construct and initalize a <code>TensorMap{S}</code>, let us discuss what is meant by &#39;tensor data&#39; and how it can efficiently and compactly be stored. Let us first discuss the case <code>sectortype(S) == Trivial</code> sector, i.e. the case of no symmetries. In that case the data of a tensor <code>t = TensorMap(..., V1 ⊗ ... ⊗ VN₁, W1 ⊗ ... ⊗ WN2)</code> can just be represented as a multidimensional array of size</p><p><code>(dim(V1), dim(V2), …, dim(VN₁), dim(W1), …, dim(WN₂))</code></p><p>which can also be reshaped into matrix of size</p><p><code>(dim(V1)*dim(V2)*…*dim(VN₁), dim(W1)*dim(W2)*…*dim(WN₂))</code></p><p>and is really the matrix representation of the linear map that the tensor represents. In particular, given a second tensor <code>t2</code> whose domain matches with the codomain of <code>t</code>, function composition amounts to multiplication of their corresponding data matrices. Similarly, tensor factorizations such as the singular value decomposition, which we discuss below, can act directly on this matrix representation.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>One might wonder if it would not have been more natural to represent the tensor data as <code>(dim(V1), dim(V2), …, dim(VN₁), dim(WN₂), …, dim(W1))</code> given how employing the duality naturally reverses the tensor product, as encountered with the interface of <a href="man/@ref"><code>repartition</code></a> for <a href="../sectors/#ss_fusiontrees-1">fusion trees</a>. However, such a representation, when plainly <code>reshape</code>d to a matrix, would not have the above properties and would thus not constitute the matrix representation of the tensor in a compatible basis.</p></div></div><p>Now consider the case where <code>sectortype(S) == G</code> for some <code>G</code> which has <code>FusionStyle(G) == Abelian()</code>, i.e. the representations of an Abelian group, e.g. <code>G == ℤ₂</code> or <code>G == U₁</code>. In this case, the tensor data is associated with sectors <code>(a1, a2, …, aN₁) ∈ sectors(V1 ⊗ V2 ⊗ … ⊗ VN₁)</code> and <code>(b1, …, bN₂) ∈ sectors(W1 ⊗ … ⊗ WN₂)</code> such that they fuse to a same common charge, i.e. <code>(c = first(⊗(a1, …, aN₁))) == first(⊗(b1, …, bN₂))</code>. The data associated with this takes the form of a multidimensional array with size <code>(dim(V1, a1), …, dim(VN₁, aN₁), dim(W1, b1), …, dim(WN₂, bN₂))</code>, or equivalently, a matrix of with row size <code>dim(V1, a1)*…*dim(VN₁, aN₁) == dim(codomain, (a1, …, aN₁))</code> and column size <code>dim(W1, b1)*…*dim(WN₂, aN₂) == dim(domain, (b1, …, bN₂))</code>.</p><p>However, there are multiple combinations of <code>(a1, …, aN₁)</code> giving rise to the same <code>c</code>, and so there is data associated with all of these, as well as all possible combinations of <code>(b1, …, bN₂)</code>. Stacking all matrices for different <code>(a1,…)</code> and a fixed value of <code>(b1,…)</code> underneath each other, and for fixed value of <code>(a1,…)</code> and different values of <code>(b1,…)</code> next to each other, gives rise to a larger block matrix of all data associated with the central sector <code>c</code>. The size of this matrix is exactly <code>(blockdim(codomain, c), blockdim(domain, c))</code> and these matrices are exactly the diagonal blocks whose existence is guaranteed by Schur&#39;s lemma, and which are labeled by the coupled sector <code>c</code>. Indeed, if we would represent the tensor map <code>t</code> as a matrix without explicitly using the symmetries, we could reorder the rows and columns to group data corresponding to sectors that fuse to the same <code>c</code>, and the resulting block diagonal representation would emerge. This basis transform is thus a permutation, which is a unitary operation, that will cancel or go through trivially for linear algebra operations such as composing tensor maps (matrix multiplication) or tensor factorizations such as a singular value decomposition. For such linear algebra operations, we can thus directly act on these large matrices, which correspond to the diagonal blocks that emerge after a basis transform, provided that the partition of the tensor indices in domain and codomain of the tensor are in line with our needs. For example, composing two tensor maps amounts to multiplying the matrices corresponding to the same <code>c</code> (provided that its subblocks labeled by the different combinations of sectors are ordered in the same way, which we guarantee by associating a canonical order with sectors). Henceforth, we refer to the <code>blocks</code> of a tensor map as those diagonal blocks, the existence of which is provided by Schur&#39;s lemma and which are labeled by the coupled sectors <code>c</code>. We directly store these blocks as <code>DenseMatrix</code> and gather them as values in a dictionary, together with the corresponding coupled sector <code>c</code> as key. For a given tensor <code>t</code>, we can access a specific block as <code>block(t, c)</code>, whereas <code>blocks(t)</code> yields an iterator over pairs <code>c=&gt;block(t,c)</code>.</p><p>The subblocks corresponding to a particular combination of sectors then correspond to a particular view for some range of the rows and some range of the colums, i.e. <code>view(block(t, c), m₁:m₂, n₁:n₂)</code> where the ranges <code>m₁:m₂</code> associated with <code>(a1, …, aN₁)</code> and <code>n₁:n₂</code> associated with <code>(b₁, …, bN₂)</code> are stored within the fields of the instance <code>t</code> of type <code>TensorMap</code>. This <code>view</code> can then lazily be reshaped to a multidimensional array, for which we rely on the package <a href="https://github.com/Jutho/Strided.jl">Strided.jl</a>. Indeed, the data in this <code>view</code> is not contiguous, because the stride between the different columns is larger than the length of the columns. Nonetheless, this does not pose a problem and even as multidimensional array there is still a definite stride associated with each dimension.</p><p>When <code>FusionStyle(G) isa NonAbelian</code>, things become slightly more complicated. Not only do <code>(a1, …, aN₁)</code> give rise to different coupled sectors <code>c</code>, there can be multiply ways in which they fuse to <code>c</code>. These different possibilities are enumerated by the iterator <code>fusiontrees((a1, …, aN₁), c)</code> and <code>fusiontrees((b1, …, bN₂), c)</code>, and with each of those, there is tensor data that takes the form of a multidimensional array, or, after reshaping, a matrix of size <code>(dim(codomain, (a1, …, aN₁)), dim(domain, (b1, …, bN₂))))</code>. Again, we can stack all such matrices with the same value of <code>f₁ ∈ fusiontrees((a1, …, aN₁), c)</code> horizontally (as they all have the same number of rows), and with the same value of <code>f₂ ∈ fusiontrees((b1, …, bN₂), c)</code> vertically (as they have the same number of columns). What emerges is a large matrix of size <code>(blockdim(codomain, c), blockdim(domain, c))</code> containing all the tensor data associated with the coupled sector <code>c</code>, where <code>blockdim(P, c) = sum(dim(P, s)*length(fusiontrees(s, c)) for s in sectors(P))</code> for some instance <code>P</code> of <code>ProductSpace</code>. The tensor implementation does not distinguish between abelian or non-abelian sectors and still stores these matrices as a <code>DenseMatrix</code>, accessible via <code>block(t, c)</code>.</p><p>At first sight, it might now be less clear what the relevance of this block is in relation to the full matrix representation of the tensor map, where the symmetry is not exploited. The essential interpretation is still the same. Schur&#39;s lemma now tells that there is a unitary basis transform which makes this matrix representation block diagonal, more specifically, of the form <span>$⨁_{c} B_c ⊗ 𝟙_{c}$</span>, where <span>$B_c$</span> denotes <code>block(t,c)</code> and <span>$𝟙_{c}$</span> is an identity matrix of size <code>(dim(c), dim(c))</code>. The reason for this extra identity is that the group representation is recoupled to act as <span>$⨁_{c} 𝟙 ⊗ u_c(g)$</span> for all <span>$g ∈ \mathsf{G}$</span>, with <span>$u_c(g)$</span> the matrix representation of group element <span>$g$</span> according to the irrep <span>$c$</span>. In the abelian case, <code>dim(c) == 1</code>, i.e. all irreducible representations are one-dimensional and Schur&#39;s lemma only dictates that all off-diagonal blocks are zero. However, in this case the basis transform to the block diagonal representation is not simply a permutation matrix, but a more general unitary matrix composed of the different fusion trees. Indeed, let us denote the fusion trees <code>f₁ ∈ fusiontrees((a1, …, aN₁), c)</code> as <span>$X^{a_1, …, a_{N₁}}_{c,α}$</span> where <span>$α = (e_1, …, e_{N_1-2}; μ₁, …, μ_{N_1-1})$</span> is a collective label for the internal sectors <code>e</code> and the vertex degeneracy labels <code>μ</code> of a generic fusion tree, as discussed in the <a href="../sectors/#ss_fusiontrees-1">corresponding section</a>. The tensor is then represented as</p><p><img src="../img/tensor-storage.svg" alt="tensor storage"/></p><p>In this diagram, we have indicated how the tensor map can be rewritten in terms of a block diagonal matrix with a unitary matrix on its left and another unitary matrix (if domain and codomain are different) on its right. So the left and right matrices should actually have been drawn as squares. They represent the unitary basis transform. In this picture, red and white regions are zero. The center matrix is most easy to interpret. It is the block diagonal matrix <span>$⨁_{c} B_c ⊗ 𝟙_{c}$</span> with diagonal blocks labeled by the coupled charge <code>c</code>, in this case it takes two values. Every single small square in between the dotted or dashed lines has size <span>$d_c × d_c$</span> and corresponds to a single element of <span>$B_c$</span>, tensored with the identity <span>$\mathrm{id}_c$</span>. Instead of <span>$B_c$</span>, a more accurate labelling is <span>$t^c_{(a_1 … a_{N₁})α, (b_1 … b_{N₂})β}$</span> where <span>$α$</span> labels different fusion trees from <span>$(a_1 … a_{N₁})$</span> to <span>$c$</span>. The dashed horizontal lines indicate regions corresponding to different fusion (actually splitting) trees, either because of different sectors <span>$(a_1 … a_{N₁})$</span> or different labels <span>$α$</span> within the same sector. Similarly, the dashed vertical lines define the border between regions of different fusion trees from the domain to <code>c</code>, either because of different sectors <span>$(b_1 … b_{N₂})$</span> or a different label <span>$β$</span>.</p><p>To understand this better, we need to understand the basis transform, e.g. on the left (codomain) side. In more detail, it is given by</p><p><img src="../img/tensor-unitary.svg" alt="tensor unitary"/></p><p>Indeed, remembering that <span>$V_i = ⨁_{a_i} R_{a_i} ⊗ ℂ^{n_{a_i}}$</span> with <span>$R_{a_i}$</span> the representation space on which irrep <span>$a_i$</span> acts (with dimension <span>$\mathrm{dim}(a_i)$</span>), we find <span>$V_1 ⊗ … ⊗ V_{N_1} = ⨁_{a_1, …, a_{N₁}} (R_{a_1} ⊗ … ⊗ R_{a_{N_1}}) ⊗ ℂ^{n_{a_1} × … n_{a_{N_1}}}$</span>. In the diagram above, the wiggly lines correspond to the direct sum over the different sectors <span>$(a_1, …, a_{N₁})$</span>, there depicted taking three possible values <span>$(a…)$</span>, <span>$(a…)′$</span> and <span>$(a…)′′$</span>. The tensor product <span>$(R_{a_1} ⊗ … ⊗ R_{a_{N_1}}) ⊗ ℂ^{n_{a_1} × … n_{a_{N_1}}}$</span> is depicted as <span>$(R_{a_1} ⊗ … ⊗ R_{a_{N_1}})^{⊕ n_{a_1} × … n_{a_{N_1}}}$</span>, i.e. as a direct sum of the spaces <span>$R_{(a…)} = (R_{a_1} ⊗ … ⊗ R_{a_{N_1}})$</span> according to the dotted horizontal lines, which repeat <span>$n_{(a…)} = n_{a_1} × … n_{a_{N_1}}$</span> times. In this particular example, <span>$n_{(a…)}=2$</span>, <span>$n_{(a…)&#39;}=3$</span> and <span>$n_{(a…)&#39;&#39;}=5$</span>. The thick vertical line represents the separation between the two different coupled sectors, denoted as <span>$c$</span> and <span>$c&#39;$</span>. Dashed vertical lines represent different ways of reaching the coupled sector, corresponding to different <code>α</code>. In this example, the first sector <span>$(a…)$</span> has one fusion tree to <span>$c$</span>, labeled by <span>$c,α$</span>, and two fusion trees to <span>$c&#39;$</span>, labeled by <span>$c&#39;,α$</span> and <span>$c&#39;,α&#39;$</span>. The second sector has only a fusion tree to <span>$c$</span>, labeled by <span>$c,α&#39;$</span>. The third sector only has a fusion tree to <span>$c&#39;$</span>, labeld by <span>$c&#39;, α&#39;&#39;$</span>. Finally then, because the fusion trees do not act on the spaces <span>$ℂ^{n_{a_1} × … n_{a_{N_1}}}$</span>, the dotted lines which represent the different <span>$n_{(a…)} = n_{a_1} × … n_{a_{N_1}}$</span> dimensions are also drawn vertically. In particular, for a given sector <span>$(a…)$</span> and a specific fusion tree <span>$X^{(a…)}_{c,α}: R_{(a…)}→R_c$</span>, the action is <span>$X^{(a…)}_{c,α} ⊗ 𝟙_{n_{(a…)}}$</span>, which corresponds to the diagonal green blocks in this drawing where the same matrix <span>$X^{(a…)}_{c,α}$</span> (the fusion tree) is repeated along the diagonal. Note that the fusion tree is not a vector or single column, but a matrix with number of rows equal to <span>$\mathrm{dim}(R_{(a\ldots)}) = d_{a_1} d_{a_2} … d_{a_{N_1}}$</span> and number of columns equal to <span>$d_c$</span>. A similar interpretation can be given to the basis transform on the right, by taking its adjoint. In this particular example, it has two different combinations of sectors <span>$(b…)$</span> and <span>$(b…)&#39;$</span>, where both have a single fusion tree to <span>$c$</span> as well as to <span>$c&#39;$</span>, and <span>$n_{(b…)}=2$</span>, <span>$n_{(b…)&#39;}=3$</span>.</p><p>Note that we never explicitly store or act with the basis transforms on the left and the right. For composing tensor maps (i.e. multiplying them), these basis transforms just cancel, whereas for tensor factorizations they just go through trivially. They transform non-trivially when reshuffling the tensor indices, both within or in between the domain and codomain. For this, however, we can completely rely on the manipulations of fusion trees to implicitly compute the effect of the basis transform and construct the new blocks <span>$B_c$</span> that result with respect to the new basis.</p><p>Hence, as before, we only store the diagonal blocks <span>$B_c$</span> of size <code>(blockdim(codomain(t), c), blockdim(domain(t), c))</code> as a <code>DenseMatrix</code>, accessible via <code>block(t, c)</code>. Within this matrix, there are regions of the form <code>view(block(t, c), m₁:m₂, n₁:n₂)</code> that correspond to the data <span>$t^c_{(a_1 … a_{N₁})α, (b_1 … b_{N₂})β}$</span> associated with a pair of fusion trees <span>$X^{(a_1 … a_{N₁}}_{c,α}$</span> and <span>$X^{(b_1 … b_{N₂})}_{c,β}$</span>, henceforth again denoted as <code>f₁</code> and <code>f₂</code>, with <code>f₁.coupled == f₂.coupled == c</code>. The ranges where this subblock is living are managed within the tensor implementation, and these subblocks can be accessed via <code>t[f₁,f₂]</code>, and is returned as a <code>StridedArray</code> of size <span>$n_{a_1} × n_{a_2} × … × n_{a_{N_1}} × n_{b_1} × … n_{b_{N₂}}$</span>, or in code, <code>(dim(V1, a1), dim(V2, a2), …, dim(VN₁, aN₁), dim(W1, b1), …, dim(WN₂, bN₂))</code>. While the implementation does not distinguish between <code>FusionStyle isa Abelian</code> or <code>FusionStyle isa NonAbelian</code>, in the former case the fusion tree is completely characterized by the uncoupled sectors, and so the subblocks can also be accessed as <code>t[(a1, …, aN₁), (b1, …, bN₂)]</code>. When there is no symmetry at all, i.e. <code>sectortype(t) == Trivial</code>, <code>t[]</code> returns the raw tensor data as a <code>StridedArray</code> of size <code>(dim(V1), …, dim(VN₁), dim(W1), …, dim(WN₂))</code>, whereas <code>block(t, Trivial())</code> returns the same data as a <code>DenseMatrix</code> of size <code>(dim(V1) * … * dim(VN₁), dim(W1) * … * dim(WN₂))</code>.</p><h2 id="Constructing-tensor-maps-and-accessing-tensor-data-1"><a class="docs-heading-anchor" href="#Constructing-tensor-maps-and-accessing-tensor-data-1">Constructing tensor maps and accessing tensor data</a><a class="docs-heading-anchor-permalink" href="#Constructing-tensor-maps-and-accessing-tensor-data-1" title="Permalink"></a></h2><p>Having learned how a tensor is represented and stored, we can now discuss how to create tensors and tensor maps. From hereon, we focus purely on the interface rather than the implementation.</p><p>The most convenient set of constructors are those that construct  tensors or tensor maps with random or uninitialized data. They take the form</p><p><code>TensorMap(f, codomain, domain)</code></p><p><code>TensorMap(f, eltype::Type{&lt;:Number}, codomain, domain)</code></p><p><code>TensorMap(undef, codomain, domain)</code></p><p><code>TensorMap(undef, eltype::Type{&lt;:Number}, codomain, domain)</code></p><p>Here, in the first form, <code>f</code> can be any function or object that is called with an argument of type <code>Dims{2} = Tuple{Int,Int}</code> and is such that <code>f((m,n))</code> creates a <code>DenseMatrix</code> instance with <code>size(f(m,n)) == (m,n)</code>. In the second form, <code>f</code> is called as <code>f(eltype,(m,n))</code>. Possibilities for <code>f</code> are <code>randn</code> and <code>rand</code> from Julia Base. TensorKit.jl provides <code>randnormal</code> and <code>randuniform</code> as an synonym for <code>randn</code> and <code>rand</code>, as well as the new function  <code>randisometry</code>, alternatively called <code>randhaar</code>, that creates a random isometric <code>m × n</code> matrix <code>w</code> satisfying <code>w&#39;*w ≈ I</code> distributed according to the Haar measure (this requires <code>m&gt;= n</code>). The third and fourth calling syntax use the <code>UndefInitializer</code> from Julia Base and generates a <code>TensorMap</code> with unitialized data, which could thus contain <code>NaN</code>s.</p><p>In all of these constructors, the last two arguments can be replaced by <code>domain→codomain</code> or <code>codomain←domain</code>, where the arrows are obtained as <code>\rightarrow+TAB</code> and <code>\leftarrow+TAB</code>. These arrows just create a Julia <code>Pair</code>, i.e. also <code>domain =&gt; codomain</code> can be used, provided that <code>domain</code> and <code>codomain</code> are of type <code>ProductSpace</code>. The advantage of the unicode arrows is that they will also convert a single instance of type <code>S&lt;:ElementarySpace</code> to a corresponding <code>ProductSpace{S,1}</code>. Some examples are perhaps in order</p><pre><code class="language-julia-repl">julia&gt; t1 = TensorMap(randn, ℂ^2 ⊗ ℂ^3, ℂ^2)
+TensorMap((ℂ^2 ⊗ ℂ^3) ← ProductSpace(ℂ^2)):
+[:, :, 1] =
+ 3.110612714301991   -0.6125643119965416   1.8140396899929803
+ 0.8219367784827887   2.533196797069263   -0.42376416758266117
+
+[:, :, 2] =
+  1.19316361088586     1.562577520250601   -0.9930104463295408
+ -0.3579098703899679  -1.4932582354846309   1.0905039781528056
+
+julia&gt; t2 = TensorMap(randn, Float32, ℂ^2 ⊗ ℂ^3 ← ℂ^2)
+TensorMap((ℂ^2 ⊗ ℂ^3) ← ProductSpace(ℂ^2)):
+[:, :, 1] =
+  0.7406802f0   0.2517975f0   0.9615549f0
+ -0.68150914f0  0.3750341f0  -0.45151982f0
+
+[:, :, 2] =
+  0.2983976f0  -0.31988707f0   0.92784053f0
+ -0.8432465f0  -0.7995055f0   -1.0949073f0
+
+julia&gt; t3 = TensorMap(undef, ℂ^2 → ℂ^2 ⊗ ℂ^3)
+TensorMap((ℂ^2 ⊗ ℂ^3) ← ProductSpace(ℂ^2)):
+[:, :, 1] =
+ 6.365987375e-314    6.3659873744e-314  6.3659873744e-314
+ 1.27319747483e-313  6.3659873744e-314  6.3659873744e-314
+
+[:, :, 2] =
+ 2.1219957914e-313   1.69759663317e-313  4.243991586e-314
+ 1.69759663317e-313  1.69759663317e-313  6.9170696798096e-310
+
+julia&gt; t4failed = TensorMap(undef, ComplexF64, ℂ^2 =&gt; ℂ^2 ⊗ ℂ^3)
+ERROR: MethodError: no method matching TensorMap(::UndefInitializer, ::Type{Complex{Float64}}, ::Pair{ComplexSpace,ProductSpace{ComplexSpace,2}})
+Closest candidates are:
+  TensorMap(::UndefInitializer, ::Type{T&lt;:Number}, !Matched::ProductSpace{S&lt;:ElementarySpace,N} where N, !Matched::ProductSpace{S&lt;:ElementarySpace,N} where N) where {S&lt;:ElementarySpace, T&lt;:Number} at /home/travis/build/Jutho/TensorKit.jl/src/tensors/tensor.jl:163
+  TensorMap(::Any, ::Type{T&lt;:Number}, !Matched::ProductSpace{S&lt;:ElementarySpace,N} where N, !Matched::ProductSpace{S&lt;:ElementarySpace,N} where N) where {S&lt;:ElementarySpace, T&lt;:Number} at /home/travis/build/Jutho/TensorKit.jl/src/tensors/tensor.jl:156
+  TensorMap(::Any, ::Type{T&lt;:Number}, !Matched::Union{ProductSpace{S&lt;:ElementarySpace,N} where N, S&lt;:ElementarySpace}, !Matched::Union{ProductSpace{S&lt;:ElementarySpace,N} where N, S&lt;:ElementarySpace}) where {T&lt;:Number, S&lt;:ElementarySpace} at /home/travis/build/Jutho/TensorKit.jl/src/tensors/tensor.jl:169
+  ...
+
+julia&gt; t4 = TensorMap(undef, ComplexF64, ProductSpace(ℂ^2) =&gt; ℂ^2 ⊗ ℂ^3)
+TensorMap((ℂ^2 ⊗ ℂ^3) ← ProductSpace(ℂ^2)):
+[:, :, 1] =
+  6.9172741585694e-310 + 0.0im                    …  6.91727347216006e-310 + 6.9172734689494e-310im
+ 6.91727347216006e-310 + 6.91727427963447e-310im                       0.0 + 6.91727347216006e-310im
+
+[:, :, 2] =
+ 6.91727415809037e-310 + 0.0im                   …  6.91727347216006e-310 + 6.9172734689494e-310im
+ 6.91727347216006e-310 + 6.9172741585473e-310im                       0.0 + 6.9172741585552e-310im
+
+julia&gt; domain(t1) == domain(t2) == domain(t3) == domain(t4)
+true
+
+julia&gt; codomain(t1) == codomain(t2) == codomain(t3) == codomain(t4)
+true
+
+julia&gt; disp(x) = show(IOContext(Core.stdout, :compact=&gt;false), &quot;text/plain&quot;, trunc.(x; digits = 3));
+
+julia&gt; t1[] |&gt; disp
+2×3×2 Strided.StridedView{Float64,3,Array{Float64,1},typeof(identity)}:
+[:, :, 1] =
+ 3.11   -0.612   1.814
+ 0.821   2.533  -0.423
+
+[:, :, 2] =
+  1.193   1.562  -0.993
+ -0.357  -1.493   1.09 
+julia&gt; block(t1, Trivial()) |&gt; disp
+6×2 Array{Float64,2}:
+  3.11    1.193
+  0.821  -0.357
+ -0.612   1.562
+  2.533  -1.493
+  1.814  -0.993
+ -0.423   1.09 
+julia&gt; reshape(t1[], dim(codomain(t)), dim(domain(t))) |&gt; disp
+ERROR: UndefVarError: t not defined</code></pre><p>Finally, all constructors can also be replaced by <code>Tensor(..., codomain)</code>, in which case the domain is assumed to be the empty <code>ProductSpace{S,0}()</code>, which can easily be obtained as <code>one(codomain)</code>. Indeed, the empty product space is the unit object of the monoidal category, equivalent to the field of scalars <code>𝕜</code>, and thus the multiplicative identity (especially since <code>*</code> also acts as tensor product on vector spaces).</p><p>The matrices created by <code>f</code> are the matrices <span>$B_c$</span> discussed above, i.e. those returned by <code>block(t, c)</code>. Only numerical matrices of type <code>DenseMatrix</code> are accepted, which in practice just means Julia&#39;s intrinsic <code>Matrix{T}</code> for some <code>T&lt;:Number</code>. In the future, we will add support for <code>CuMatrix</code> from <a href="https://github.com/JuliaGPU/CuArrays.jl">CuArrays.jl</a> to harness GPU computing power, and maybe <code>SharedArray</code> from the Julia&#39;s <code>SharedArrays</code> standard library.</p><p>Support for static or sparse data is currently not available, and if it would be implemented, it would lead to new subtypes of <code>AbstractTensorMap</code> which are distinct from <code>TensorMap</code>.</p><p>Let&#39;s conclude this section with some examples with <code>RepresentationSpace</code>.</p><pre><code class="language-julia-repl">julia&gt; V1 = ℤ₂Space(0=&gt;3,1=&gt;2)
+ℤ₂Space(0=&gt;3, 1=&gt;2)
+
+julia&gt; V2 = ℤ₂Space(0=&gt;2,1=&gt;1)
+ℤ₂Space(0=&gt;2, 1=&gt;1)
+
+julia&gt; t = TensorMap(randn, V1 ⊗ V1, V2 ⊗ V2&#39;)
+TensorMap((ℤ₂Space(0=&gt;3, 1=&gt;2) ⊗ ℤ₂Space(0=&gt;3, 1=&gt;2)) ← (ℤ₂Space(0=&gt;2, 1=&gt;1) ⊗ ℤ₂Space(0=&gt;2, 1=&gt;1)&#39;)):
+* Data for sector (ℤ₂(1), ℤ₂(1)) ← (ℤ₂(0), ℤ₂(0)):
+[:, :, 1, 1] =
+  0.18451296061562225  -0.21957319418595245
+ -0.19147775143593665  -0.014991880227806531
+
+[:, :, 2, 1] =
+ 1.505143718834194   -0.5366269935187508
+ 1.1630394511600421  -0.48815482952541084
+
+[:, :, 1, 2] =
+ -0.14042405660703583  -0.11371970377351329
+  0.6326753154892115    0.3832625341810671
+
+[:, :, 2, 2] =
+ 0.7453705967326684  -2.6631448913528883
+ 0.4305934842901655   0.13434635000031006
+* Data for sector (ℤ₂(0), ℤ₂(0)) ← (ℤ₂(0), ℤ₂(0)):
+[:, :, 1, 1] =
+  2.074804584322372     1.6744312950602223   0.8682086323101343
+  0.13649011634543465  -0.5915051343275536  -0.24951108659906324
+ -0.4055980939290768   -0.3178985514535386   0.19011543042958418
+
+[:, :, 2, 1] =
+  0.15889511299141296   0.07483913229527889   0.4806714408259672
+ -0.5578131449126158   -0.01727423765614128   0.24861859745067444
+ -0.4142955774299937   -0.7369190242713021   -1.0528423704858338
+
+[:, :, 1, 2] =
+  0.7850288656328471  -0.10403428217431633  -0.9342619535297303
+ -1.5038282312037725   2.766005868348871    -0.04504331967980642
+  0.0749615896604099  -1.176215196478559    -0.3223583749128122
+
+[:, :, 2, 2] =
+  2.4999888898023848  -0.8129458044529766   -1.8304550301121425
+ -0.9536700591985807   1.0581223874292047    0.16258943849964677
+ -0.5277262963113889  -0.02272281329338031   0.45658212382756264
+* Data for sector (ℤ₂(1), ℤ₂(1)) ← (ℤ₂(1), ℤ₂(1)):
+[:, :, 1, 1] =
+ 0.6271634104362471   1.5914581313683356
+ 1.3076785720143114  -0.39184701271185074
+* Data for sector (ℤ₂(0), ℤ₂(0)) ← (ℤ₂(1), ℤ₂(1)):
+[:, :, 1, 1] =
+ -0.4819637623257173  -0.3260082189089168   -1.0962213600770676
+  0.350831711083062   -0.2810252940381292   -2.2386991362255997
+  0.28594109736152     0.06054890729149428  -1.6906592676177394
+* Data for sector (ℤ₂(1), ℤ₂(0)) ← (ℤ₂(1), ℤ₂(0)):
+[:, :, 1, 1] =
+ 0.1417409833426521   -0.15531666101637942   1.0791849678673278
+ 0.23410657505403953  -0.6398355386348291   -0.029817483410566423
+
+[:, :, 1, 2] =
+ 1.6569640662992184   2.489433922019176   -0.4293676637878655
+ 0.49691617578127983  0.8482082457019574   0.6840512974868659
+* Data for sector (ℤ₂(0), ℤ₂(1)) ← (ℤ₂(1), ℤ₂(0)):
+[:, :, 1, 1] =
+  1.3025464801297901   -0.9662624999461669
+  0.2069633791640479    0.634063679284299
+ -0.19261143704405712  -0.6124369522680024
+
+[:, :, 1, 2] =
+ -0.17477404561181828  -1.6688709978019427
+ -1.3399933543504559   -0.10282507402775683
+ -0.7361997620034066   -0.6434474146813731
+* Data for sector (ℤ₂(1), ℤ₂(0)) ← (ℤ₂(0), ℤ₂(1)):
+[:, :, 1, 1] =
+ 1.310798479850429   0.09741651697747915   1.0132756660825184
+ 2.9277869317118776  0.10257927102200462  -1.8213036274186147
+
+[:, :, 2, 1] =
+  1.127699912537003     0.28589882715989434  -0.7171844361563117
+ -0.22759561607433065  -1.8845118973517359   -0.4323902267852928
+* Data for sector (ℤ₂(0), ℤ₂(1)) ← (ℤ₂(0), ℤ₂(1)):
+[:, :, 1, 1] =
+ -2.905548342063073    0.17128231132617264
+ -1.0223906291985547   0.3125297405012656
+ -0.3057954915453827  -0.5108436016429493
+
+[:, :, 2, 1] =
+  1.8477236975142837   -0.5397299115081445
+ -0.36580047808559324   0.7543362824660664
+  0.1561939531069269    0.7447400931637002
+
+julia&gt; (array = convert(Array, t)) |&gt; disp
+5×5×3×3 Array{Float64,4}:
+[:, :, 1, 1] =
+  2.074   1.674   0.868   0.0     0.0  
+  0.136  -0.591  -0.249   0.0     0.0  
+ -0.405  -0.317   0.19    0.0     0.0  
+  0.0     0.0     0.0     0.184  -0.219
+  0.0     0.0     0.0    -0.191  -0.014
+
+[:, :, 2, 1] =
+  0.158   0.074   0.48   0.0     0.0  
+ -0.557  -0.017   0.248  0.0     0.0  
+ -0.414  -0.736  -1.052  0.0     0.0  
+  0.0     0.0     0.0    1.505  -0.536
+  0.0     0.0     0.0    1.163  -0.488
+
+[:, :, 3, 1] =
+ 0.0     0.0     0.0     1.302  -0.966
+ 0.0     0.0     0.0     0.206   0.634
+ 0.0     0.0     0.0    -0.192  -0.612
+ 0.141  -0.155   1.079   0.0     0.0  
+ 0.234  -0.639  -0.029   0.0     0.0  
+
+[:, :, 1, 2] =
+  0.785  -0.104  -0.934   0.0     0.0  
+ -1.503   2.766  -0.045   0.0     0.0  
+  0.074  -1.176  -0.322   0.0     0.0  
+  0.0     0.0     0.0    -0.14   -0.113
+  0.0     0.0     0.0     0.632   0.383
+
+[:, :, 2, 2] =
+  2.499  -0.812  -1.83   0.0     0.0  
+ -0.953   1.058   0.162  0.0     0.0  
+ -0.527  -0.022   0.456  0.0     0.0  
+  0.0     0.0     0.0    0.745  -2.663
+  0.0     0.0     0.0    0.43    0.134
+
+[:, :, 3, 2] =
+ 0.0    0.0     0.0    -0.174  -1.668
+ 0.0    0.0     0.0    -1.339  -0.102
+ 0.0    0.0     0.0    -0.736  -0.643
+ 1.656  2.489  -0.429   0.0     0.0  
+ 0.496  0.848   0.684   0.0     0.0  
+
+[:, :, 1, 3] =
+ 0.0    0.0     0.0    -2.905   0.171
+ 0.0    0.0     0.0    -1.022   0.312
+ 0.0    0.0     0.0    -0.305  -0.51 
+ 1.31   0.097   1.013   0.0     0.0  
+ 2.927  0.102  -1.821   0.0     0.0  
+
+[:, :, 2, 3] =
+  0.0     0.0     0.0     1.847  -0.539
+  0.0     0.0     0.0    -0.365   0.754
+  0.0     0.0     0.0     0.156   0.744
+  1.127   0.285  -0.717   0.0     0.0  
+ -0.227  -1.884  -0.432   0.0     0.0  
+
+[:, :, 3, 3] =
+ -0.481  -0.326  -1.096  0.0     0.0  
+  0.35   -0.281  -2.238  0.0     0.0  
+  0.285   0.06   -1.69   0.0     0.0  
+  0.0     0.0     0.0    0.627   1.591
+  0.0     0.0     0.0    1.307  -0.391
+julia&gt; d1 = dim(codomain(t))
+25
+
+julia&gt; d2 = dim(domain(t))
+9
+
+julia&gt; (matrix = reshape(array, d1, d2)) |&gt; disp
+25×9 Array{Float64,2}:
+  2.074   0.158   0.0     0.785   2.499   0.0     0.0     0.0    -0.481
+  0.136  -0.557   0.0    -1.503  -0.953   0.0     0.0     0.0     0.35 
+ -0.405  -0.414   0.0     0.074  -0.527   0.0     0.0     0.0     0.285
+  0.0     0.0     0.141   0.0     0.0     1.656   1.31    1.127   0.0  
+  0.0     0.0     0.234   0.0     0.0     0.496   2.927  -0.227   0.0  
+  1.674   0.074   0.0    -0.104  -0.812   0.0     0.0     0.0    -0.326
+ -0.591  -0.017   0.0     2.766   1.058   0.0     0.0     0.0    -0.281
+ -0.317  -0.736   0.0    -1.176  -0.022   0.0     0.0     0.0     0.06 
+  0.0     0.0    -0.155   0.0     0.0     2.489   0.097   0.285   0.0  
+  0.0     0.0    -0.639   0.0     0.0     0.848   0.102  -1.884   0.0  
+  0.868   0.48    0.0    -0.934  -1.83    0.0     0.0     0.0    -1.096
+ -0.249   0.248   0.0    -0.045   0.162   0.0     0.0     0.0    -2.238
+  0.19   -1.052   0.0    -0.322   0.456   0.0     0.0     0.0    -1.69 
+  0.0     0.0     1.079   0.0     0.0    -0.429   1.013  -0.717   0.0  
+  0.0     0.0    -0.029   0.0     0.0     0.684  -1.821  -0.432   0.0  
+  0.0     0.0     1.302   0.0     0.0    -0.174  -2.905   1.847   0.0  
+  0.0     0.0     0.206   0.0     0.0    -1.339  -1.022  -0.365   0.0  
+  0.0     0.0    -0.192   0.0     0.0    -0.736  -0.305   0.156   0.0  
+  0.184   1.505   0.0    -0.14    0.745   0.0     0.0     0.0     0.627
+ -0.191   1.163   0.0     0.632   0.43    0.0     0.0     0.0     1.307
+  0.0     0.0    -0.966   0.0     0.0    -1.668   0.171  -0.539   0.0  
+  0.0     0.0     0.634   0.0     0.0    -0.102   0.312   0.754   0.0  
+  0.0     0.0    -0.612   0.0     0.0    -0.643  -0.51    0.744   0.0  
+ -0.219  -0.536   0.0    -0.113  -2.663   0.0     0.0     0.0     1.591
+ -0.014  -0.488   0.0     0.383   0.134   0.0     0.0     0.0    -0.391
+julia&gt; (u = reshape(convert(Array, TensorMap(I, codomain(t), fuse(codomain(t)))), d1, d1)) |&gt; disp
+25×25 Array{Float64,2}:
+ 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+julia&gt; (v = reshape(convert(Array, TensorMap(I, domain(t), fuse(domain(t)))), d2, d2)) |&gt; disp
+9×9 Array{Float64,2}:
+ 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+ 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+julia&gt; u&#39;*u ≈ I ≈ v&#39;*v
+true
+
+julia&gt; (u&#39;*matrix*v) |&gt; disp
+25×9 Array{Float64,2}:
+  2.074   0.158   0.785   2.499  -0.481   0.0     0.0     0.0     0.0  
+  0.136  -0.557  -1.503  -0.953   0.35    0.0     0.0     0.0     0.0  
+ -0.405  -0.414   0.074  -0.527   0.285   0.0     0.0     0.0     0.0  
+  1.674   0.074  -0.104  -0.812  -0.326   0.0     0.0     0.0     0.0  
+ -0.591  -0.017   2.766   1.058  -0.281   0.0     0.0     0.0     0.0  
+ -0.317  -0.736  -1.176  -0.022   0.06    0.0     0.0     0.0     0.0  
+  0.868   0.48   -0.934  -1.83   -1.096   0.0     0.0     0.0     0.0  
+ -0.249   0.248  -0.045   0.162  -2.238   0.0     0.0     0.0     0.0  
+  0.19   -1.052  -0.322   0.456  -1.69    0.0     0.0     0.0     0.0  
+  0.184   1.505  -0.14    0.745   0.627   0.0     0.0     0.0     0.0  
+ -0.191   1.163   0.632   0.43    1.307   0.0     0.0     0.0     0.0  
+ -0.219  -0.536  -0.113  -2.663   1.591   0.0     0.0     0.0     0.0  
+ -0.014  -0.488   0.383   0.134  -0.391   0.0     0.0     0.0     0.0  
+  0.0     0.0     0.0     0.0     0.0     0.141   1.656   1.31    1.127
+  0.0     0.0     0.0     0.0     0.0     0.234   0.496   2.927  -0.227
+  0.0     0.0     0.0     0.0     0.0    -0.155   2.489   0.097   0.285
+  0.0     0.0     0.0     0.0     0.0    -0.639   0.848   0.102  -1.884
+  0.0     0.0     0.0     0.0     0.0     1.079  -0.429   1.013  -0.717
+  0.0     0.0     0.0     0.0     0.0    -0.029   0.684  -1.821  -0.432
+  0.0     0.0     0.0     0.0     0.0     1.302  -0.174  -2.905   1.847
+  0.0     0.0     0.0     0.0     0.0     0.206  -1.339  -1.022  -0.365
+  0.0     0.0     0.0     0.0     0.0    -0.192  -0.736  -0.305   0.156
+  0.0     0.0     0.0     0.0     0.0    -0.966  -1.668   0.171  -0.539
+  0.0     0.0     0.0     0.0     0.0     0.634  -0.102   0.312   0.754
+  0.0     0.0     0.0     0.0     0.0    -0.612  -0.643  -0.51    0.744
+julia&gt; # compare with:
+       block(t, ℤ₂(0)) |&gt; disp
+13×5 Array{Float64,2}:
+  2.074   0.158   0.785   2.499  -0.481
+  0.136  -0.557  -1.503  -0.953   0.35 
+ -0.405  -0.414   0.074  -0.527   0.285
+  1.674   0.074  -0.104  -0.812  -0.326
+ -0.591  -0.017   2.766   1.058  -0.281
+ -0.317  -0.736  -1.176  -0.022   0.06 
+  0.868   0.48   -0.934  -1.83   -1.096
+ -0.249   0.248  -0.045   0.162  -2.238
+  0.19   -1.052  -0.322   0.456  -1.69 
+  0.184   1.505  -0.14    0.745   0.627
+ -0.191   1.163   0.632   0.43    1.307
+ -0.219  -0.536  -0.113  -2.663   1.591
+ -0.014  -0.488   0.383   0.134  -0.391
+julia&gt; block(t, ℤ₂(1)) |&gt; disp
+12×4 Array{Float64,2}:
+  0.141   1.656   1.31    1.127
+  0.234   0.496   2.927  -0.227
+ -0.155   2.489   0.097   0.285
+ -0.639   0.848   0.102  -1.884
+  1.079  -0.429   1.013  -0.717
+ -0.029   0.684  -1.821  -0.432
+  1.302  -0.174  -2.905   1.847
+  0.206  -1.339  -1.022  -0.365
+ -0.192  -0.736  -0.305   0.156
+ -0.966  -1.668   0.171  -0.539
+  0.634  -0.102   0.312   0.754
+ -0.612  -0.643  -0.51    0.744</code></pre><p>Here, we illustrated some additional concepts. We constructed a <code>TensorMap</code> where the blocks are initialized with the identity matrix using <code>I::UniformScaling</code> from Julia&#39;s <code>LinearAlgebra</code> standard library. This works even if the blocks are not square, in this case zero rows or columns (depending on the shape of the block) will be added. Creating a <code>TensorMap</code> with <code>I</code> is a useful way to construct a fixed unitary or isometry between two spaces. The operation <code>fuse(V)</code> creates an <code>ElementarySpace</code> which is isomorphic to a given space <code>V</code> (of type <code>ProductSpace</code> or <code>ElementarySpace</code>). Constructing a <code>TensorMap</code> between <code>V</code> and <code>fuse(V)</code> using the <code>I</code> constructor definitely results in a unitary, in particular it is the unitary which implements the basis change from the product basis to the coupled basis. In this case, for a group <code>G</code> with <code>FusionStyle(G) isa Abelian</code>, it is a permutation matrix. Specifically choosing <code>V</code> equal to the codomain and domain of <code>t</code>, we can construct the explicit basis transforms that bring <code>t</code> into block diagonal form.</p><p>Let&#39;s repeat the same exercise for <code>G = SU₂</code>, which has <code>FusionStyle(G) isa NonAbelian</code>.</p><pre><code class="language-julia-repl">julia&gt; V1 = SU₂Space(0=&gt;2,1=&gt;1)
+SU₂Space(0=&gt;2, 1=&gt;1)
+
+julia&gt; V2 = SU₂Space(0=&gt;1,1=&gt;1)
+SU₂Space(0=&gt;1, 1=&gt;1)
+
+julia&gt; t = TensorMap(randn, V1 ⊗ V1, V2 ⊗ V2&#39;)
+TensorMap((SU₂Space(0=&gt;2, 1=&gt;1) ⊗ SU₂Space(0=&gt;2, 1=&gt;1)) ← (SU₂Space(0=&gt;1, 1=&gt;1) ⊗ SU₂Space(0=&gt;1, 1=&gt;1)&#39;)):
+* Data for fusiontree FusionTree{SU₂}((1, 1), 0, (false, false), ()) ← FusionTree{SU₂}((0, 0), 0, (false, true), ()):
+[:, :, 1, 1] =
+ -1.7679810317504758
+* Data for fusiontree FusionTree{SU₂}((0, 0), 0, (false, false), ()) ← FusionTree{SU₂}((0, 0), 0, (false, true), ()):
+[:, :, 1, 1] =
+  0.3183894171147251  -1.2895126924210474
+ -1.1818390924733724   0.14221327458674987
+* Data for fusiontree FusionTree{SU₂}((1, 1), 0, (false, false), ()) ← FusionTree{SU₂}((1, 1), 0, (false, true), ()):
+[:, :, 1, 1] =
+ 1.7525084289822532
+* Data for fusiontree FusionTree{SU₂}((0, 0), 0, (false, false), ()) ← FusionTree{SU₂}((1, 1), 0, (false, true), ()):
+[:, :, 1, 1] =
+  0.704194913864421   1.144961351627122
+ -2.3505410358084475  0.7877159280207855
+* Data for fusiontree FusionTree{SU₂}((1, 0), 1, (false, false), ()) ← FusionTree{SU₂}((1, 0), 1, (false, true), ()):
+[:, :, 1, 1] =
+ -0.3697506296228491  1.8923120131287827
+* Data for fusiontree FusionTree{SU₂}((0, 1), 1, (false, false), ()) ← FusionTree{SU₂}((1, 0), 1, (false, true), ()):
+[:, :, 1, 1] =
+  0.28371899457878946
+ -0.6979843622562414
+* Data for fusiontree FusionTree{SU₂}((1, 1), 1, (false, false), ()) ← FusionTree{SU₂}((1, 0), 1, (false, true), ()):
+[:, :, 1, 1] =
+ 0.12289541096427788
+* Data for fusiontree FusionTree{SU₂}((1, 0), 1, (false, false), ()) ← FusionTree{SU₂}((0, 1), 1, (false, true), ()):
+[:, :, 1, 1] =
+ 2.076935754158692  0.13858422928340813
+* Data for fusiontree FusionTree{SU₂}((0, 1), 1, (false, false), ()) ← FusionTree{SU₂}((0, 1), 1, (false, true), ()):
+[:, :, 1, 1] =
+ -0.8186527166281713
+  0.5318585703995727
+* Data for fusiontree FusionTree{SU₂}((1, 1), 1, (false, false), ()) ← FusionTree{SU₂}((0, 1), 1, (false, true), ()):
+[:, :, 1, 1] =
+ -0.34208431783880755
+* Data for fusiontree FusionTree{SU₂}((1, 0), 1, (false, false), ()) ← FusionTree{SU₂}((1, 1), 1, (false, true), ()):
+[:, :, 1, 1] =
+ -0.7256636764692476  -1.3164266919453387
+* Data for fusiontree FusionTree{SU₂}((0, 1), 1, (false, false), ()) ← FusionTree{SU₂}((1, 1), 1, (false, true), ()):
+[:, :, 1, 1] =
+ -0.6046040620266252
+ -0.6548772219031159
+* Data for fusiontree FusionTree{SU₂}((1, 1), 1, (false, false), ()) ← FusionTree{SU₂}((1, 1), 1, (false, true), ()):
+[:, :, 1, 1] =
+ 0.059509535591753565
+* Data for fusiontree FusionTree{SU₂}((1, 1), 2, (false, false), ()) ← FusionTree{SU₂}((1, 1), 2, (false, true), ()):
+[:, :, 1, 1] =
+ 0.22004498103887515
+
+julia&gt; (array = convert(Array, t)) |&gt; disp
+5×5×4×4 Array{Float64,4}:
+[:, :, 1, 1] =
+  0.318  -1.289   0.0   0.0    0.0 
+ -1.181   0.142   0.0   0.0    0.0 
+  0.0     0.0     0.0   0.0   -1.02
+  0.0     0.0     0.0   1.02   0.0 
+  0.0     0.0    -1.02  0.0    0.0 
+
+[:, :, 2, 1] =
+  0.0    0.0     0.283  0.0    0.0
+  0.0    0.0    -0.697  0.0    0.0
+ -0.369  1.892   0.0    0.086  0.0
+  0.0    0.0    -0.086  0.0    0.0
+  0.0    0.0     0.0    0.0    0.0
+
+[:, :, 3, 1] =
+  0.0    0.0     0.0     0.283  0.0  
+  0.0    0.0     0.0    -0.697  0.0  
+  0.0    0.0     0.0     0.0    0.086
+ -0.369  1.892   0.0     0.0    0.0  
+  0.0    0.0    -0.086   0.0    0.0  
+
+[:, :, 4, 1] =
+  0.0    0.0    0.0   0.0     0.283
+  0.0    0.0    0.0   0.0    -0.697
+  0.0    0.0    0.0   0.0     0.0  
+  0.0    0.0    0.0   0.0     0.086
+ -0.369  1.892  0.0  -0.086   0.0  
+
+[:, :, 1, 2] =
+ 0.0    0.0    0.0  0.0    -0.818
+ 0.0    0.0    0.0  0.0     0.531
+ 0.0    0.0    0.0  0.0     0.0  
+ 0.0    0.0    0.0  0.0    -0.241
+ 2.076  0.138  0.0  0.241   0.0  
+
+[:, :, 2, 2] =
+  0.406   0.661  0.0    -0.427  0.0 
+ -1.357   0.454  0.0    -0.463  0.0 
+  0.0     0.0    0.0     0.0    0.65
+ -0.513  -0.93   0.0    -0.51   0.0 
+  0.0     0.0    0.591   0.0    0.0 
+
+[:, :, 3, 2] =
+  0.0     0.0   0.0  0.0   -0.427
+  0.0     0.0   0.0  0.0   -0.463
+  0.0     0.0   0.0  0.0    0.0  
+  0.0     0.0   0.0  0.0    0.139
+ -0.513  -0.93  0.0  0.08   0.0  
+
+[:, :, 4, 2] =
+ 0.0  0.0  0.0  0.0  0.0 
+ 0.0  0.0  0.0  0.0  0.0 
+ 0.0  0.0  0.0  0.0  0.0 
+ 0.0  0.0  0.0  0.0  0.0 
+ 0.0  0.0  0.0  0.0  0.22
+
+[:, :, 1, 3] =
+  0.0     0.0     0.0     0.818  0.0  
+  0.0     0.0     0.0    -0.531  0.0  
+  0.0     0.0     0.0     0.0    0.241
+ -2.076  -0.138   0.0     0.0    0.0  
+  0.0     0.0    -0.241   0.0    0.0  
+
+[:, :, 2, 3] =
+ 0.0    0.0    0.427   0.0    0.0
+ 0.0    0.0    0.463   0.0    0.0
+ 0.513  0.93   0.0    -0.139  0.0
+ 0.0    0.0   -0.08    0.0    0.0
+ 0.0    0.0    0.0     0.0    0.0
+
+[:, :, 3, 3] =
+  0.406  0.661  0.0    0.0   0.0 
+ -1.357  0.454  0.0    0.0   0.0 
+  0.0    0.0    0.0    0.0   0.51
+  0.0    0.0    0.0   -0.73  0.0 
+  0.0    0.0    0.51   0.0   0.0 
+
+[:, :, 4, 3] =
+  0.0     0.0   0.0   0.0    -0.427
+  0.0     0.0   0.0   0.0    -0.463
+  0.0     0.0   0.0   0.0     0.0  
+  0.0     0.0   0.0   0.0    -0.08 
+ -0.513  -0.93  0.0  -0.139   0.0  
+
+[:, :, 1, 4] =
+ 0.0    0.0    -0.818   0.0    0.0
+ 0.0    0.0     0.531   0.0    0.0
+ 2.076  0.138   0.0    -0.241  0.0
+ 0.0    0.0     0.241   0.0    0.0
+ 0.0    0.0     0.0     0.0    0.0
+
+[:, :, 2, 4] =
+ 0.0  0.0  0.0   0.0  0.0
+ 0.0  0.0  0.0   0.0  0.0
+ 0.0  0.0  0.22  0.0  0.0
+ 0.0  0.0  0.0   0.0  0.0
+ 0.0  0.0  0.0   0.0  0.0
+
+[:, :, 3, 4] =
+ 0.0    0.0   0.427  0.0   0.0
+ 0.0    0.0   0.463  0.0   0.0
+ 0.513  0.93  0.0    0.08  0.0
+ 0.0    0.0   0.139  0.0   0.0
+ 0.0    0.0   0.0    0.0   0.0
+
+[:, :, 4, 4] =
+  0.406  0.661  0.0    0.427  0.0  
+ -1.357  0.454  0.0    0.463  0.0  
+  0.0    0.0    0.0    0.0    0.591
+  0.513  0.93   0.0   -0.51   0.0  
+  0.0    0.0    0.65   0.0    0.0  
+julia&gt; d1 = dim(codomain(t))
+25
+
+julia&gt; d2 = dim(domain(t))
+16
+
+julia&gt; (matrix = reshape(array, d1, d2)) |&gt; disp
+25×16 Array{Float64,2}:
+  0.318   0.0     0.0     0.0     0.0     0.406   0.0    0.0    0.0     0.0     0.406   0.0     0.0    0.0   0.0     0.406
+ -1.181   0.0     0.0     0.0     0.0    -1.357   0.0    0.0    0.0     0.0    -1.357   0.0     0.0    0.0   0.0    -1.357
+  0.0    -0.369   0.0     0.0     0.0     0.0     0.0    0.0    0.0     0.513   0.0     0.0     2.076  0.0   0.513   0.0  
+  0.0     0.0    -0.369   0.0     0.0    -0.513   0.0    0.0   -2.076   0.0     0.0     0.0     0.0    0.0   0.0     0.513
+  0.0     0.0     0.0    -0.369   2.076   0.0    -0.513  0.0    0.0     0.0     0.0    -0.513   0.0    0.0   0.0     0.0  
+ -1.289   0.0     0.0     0.0     0.0     0.661   0.0    0.0    0.0     0.0     0.661   0.0     0.0    0.0   0.0     0.661
+  0.142   0.0     0.0     0.0     0.0     0.454   0.0    0.0    0.0     0.0     0.454   0.0     0.0    0.0   0.0     0.454
+  0.0     1.892   0.0     0.0     0.0     0.0     0.0    0.0    0.0     0.93    0.0     0.0     0.138  0.0   0.93    0.0  
+  0.0     0.0     1.892   0.0     0.0    -0.93    0.0    0.0   -0.138   0.0     0.0     0.0     0.0    0.0   0.0     0.93 
+  0.0     0.0     0.0     1.892   0.138   0.0    -0.93   0.0    0.0     0.0     0.0    -0.93    0.0    0.0   0.0     0.0  
+  0.0     0.283   0.0     0.0     0.0     0.0     0.0    0.0    0.0     0.427   0.0     0.0    -0.818  0.0   0.427   0.0  
+  0.0    -0.697   0.0     0.0     0.0     0.0     0.0    0.0    0.0     0.463   0.0     0.0     0.531  0.0   0.463   0.0  
+  0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0     0.0    0.22  0.0     0.0  
+  0.0    -0.086   0.0     0.0     0.0     0.0     0.0    0.0    0.0    -0.08    0.0     0.0     0.241  0.0   0.139   0.0  
+ -1.02    0.0    -0.086   0.0     0.0     0.591   0.0    0.0   -0.241   0.0     0.51    0.0     0.0    0.0   0.0     0.65 
+  0.0     0.0     0.283   0.0     0.0    -0.427   0.0    0.0    0.818   0.0     0.0     0.0     0.0    0.0   0.0     0.427
+  0.0     0.0    -0.697   0.0     0.0    -0.463   0.0    0.0   -0.531   0.0     0.0     0.0     0.0    0.0   0.0     0.463
+  0.0     0.086   0.0     0.0     0.0     0.0     0.0    0.0    0.0    -0.139   0.0     0.0    -0.241  0.0   0.08    0.0  
+  1.02    0.0     0.0     0.0     0.0    -0.51    0.0    0.0    0.0     0.0    -0.73    0.0     0.0    0.0   0.0    -0.51 
+  0.0     0.0     0.0    -0.086   0.241   0.0     0.08   0.0    0.0     0.0     0.0    -0.139   0.0    0.0   0.0     0.0  
+  0.0     0.0     0.0     0.283  -0.818   0.0    -0.427  0.0    0.0     0.0     0.0    -0.427   0.0    0.0   0.0     0.0  
+  0.0     0.0     0.0    -0.697   0.531   0.0    -0.463  0.0    0.0     0.0     0.0    -0.463   0.0    0.0   0.0     0.0  
+ -1.02    0.0     0.086   0.0     0.0     0.65    0.0    0.0    0.241   0.0     0.51    0.0     0.0    0.0   0.0     0.591
+  0.0     0.0     0.0     0.086  -0.241   0.0     0.139  0.0    0.0     0.0     0.0    -0.08    0.0    0.0   0.0     0.0  
+  0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.22   0.0     0.0     0.0     0.0     0.0    0.0   0.0     0.0  
+julia&gt; (u = reshape(convert(Array, TensorMap(I, codomain(t), fuse(codomain(t)))), d1, d1)) |&gt; disp
+25×25 Array{Float64,2}:
+ 1.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  1.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.999  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.999  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.999  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  1.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  1.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.999  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.999  0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.999  0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.999  0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.999  0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.999  0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    -0.707   0.0     0.0    0.0    0.707  0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.577  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0    -0.707   0.0    0.0    0.0    0.408  0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.999  0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.999  0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.707   0.0     0.0    0.0    0.707  0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0  -0.577  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.816  0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0    -0.707  0.0    0.0    0.0    0.707  0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.999  0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.999   0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.577  0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.707   0.0    0.0    0.0    0.408  0.0    0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.707  0.0    0.0    0.0    0.707  0.0  
+ 0.0  0.0  0.0  0.0   0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0    0.999
+julia&gt; (v = reshape(convert(Array, TensorMap(I, domain(t), fuse(domain(t)))), d2, d2)) |&gt; disp
+16×16 Array{Float64,2}:
+ 1.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.999  0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.0    0.999  0.0    0.0     0.0    0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.999  0.0     0.0    0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.999   0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.577  0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.707  0.0    0.0     0.0     0.408   0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.707  0.0     0.0     0.0     0.707  0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.999
+ 0.0  0.0    0.0    0.0    0.0    0.0    -0.999  0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0    -0.707   0.0    0.0    0.0    -0.707   0.0     0.0    0.0  
+ 0.0  0.577  0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.0    0.0     0.0    -0.816   0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.707  0.0     0.0     0.0    -0.707  0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.999   0.0    0.0     0.0     0.0    0.0    0.0     0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0     0.0     0.0    0.0    0.999   0.0     0.0     0.0    0.0  
+ 0.0  0.0    0.0    0.0    0.0    0.0     0.0    0.0    -0.707   0.0    0.0    0.0     0.707   0.0     0.0    0.0  
+ 0.0  0.577  0.0    0.0    0.0    0.0     0.0    0.0     0.0    -0.707  0.0    0.0     0.0     0.408   0.0    0.0  
+julia&gt; u&#39;*u ≈ I ≈ v&#39;*v
+true
+
+julia&gt; (u&#39;*matrix*v) |&gt; disp
+25×16 Array{Float64,2}:
+  0.318   0.704   0.0     0.0     0.0     0.0     0.0     0.0     0.0    -0.0     0.0    0.0    0.0    0.0    0.0   0.0 
+ -1.181  -2.35    0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.0    0.0   -0.0    0.0   0.0 
+ -1.289   1.144   0.0     0.0     0.0     0.0     0.0     0.0     0.0    -0.0     0.0    0.0    0.0   -0.0    0.0   0.0 
+  0.142   0.787   0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0   0.0 
+ -1.767   1.752   0.0     0.0     0.0     0.0    -0.0     0.0     0.0    -0.0     0.0    0.0    0.0   -0.0    0.0   0.0 
+  0.0     0.0    -0.369   0.0     0.0     2.076   0.0     0.0    -0.725   0.0     0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0    -0.369   0.0     0.0     2.076   0.0     0.0    -0.725   0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0     0.0    -0.369   0.0     0.0     2.076   0.0     0.0    -0.725  0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     1.892   0.0     0.0     0.138   0.0     0.0    -1.316   0.0     0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0     1.892   0.0     0.0     0.138   0.0     0.0    -1.316   0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0     0.0     1.892   0.0     0.0     0.138   0.0     0.0    -1.316  0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.283   0.0     0.0    -0.818   0.0     0.0    -0.604   0.0     0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0    -0.0     0.0     0.283   0.0     0.0    -0.818   0.0     0.0    -0.604   0.0    0.0    0.0   -0.0    0.0   0.0 
+  0.0     0.0     0.0     0.0     0.283   0.0     0.0    -0.818   0.0     0.0    -0.604  0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0    -0.697   0.0     0.0     0.531   0.0     0.0    -0.654   0.0     0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0    -0.0     0.0    -0.697   0.0     0.0     0.531   0.0     0.0    -0.654   0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0     0.0    -0.697   0.0     0.0     0.531   0.0     0.0    -0.654  0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.122   0.0     0.0    -0.342   0.0     0.0     0.059   0.0     0.0    0.0   -0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0     0.122   0.0     0.0    -0.342   0.0     0.0     0.059   0.0    0.0    0.0    0.0    0.0   0.0 
+  0.0     0.0     0.0     0.0     0.122   0.0     0.0    -0.342   0.0     0.0     0.059  0.0    0.0    0.0   -0.0   0.0 
+  0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.22   0.0    0.0    0.0   0.0 
+  0.0     0.0    -0.0     0.0     0.0     0.0     0.0     0.0    -0.0     0.0     0.0    0.0    0.22   0.0    0.0   0.0 
+  0.0    -0.0     0.0    -0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.0    0.0    0.22   0.0   0.0 
+  0.0     0.0     0.0     0.0    -0.0     0.0     0.0     0.0     0.0     0.0    -0.0    0.0    0.0    0.0    0.22  0.0 
+  0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0    0.0    0.0    0.0    0.0   0.22
+julia&gt; # compare with:
+       block(t, SU₂(0)) |&gt; disp
+5×2 Array{Float64,2}:
+  0.318   0.704
+ -1.181  -2.35 
+ -1.289   1.144
+  0.142   0.787
+ -1.767   1.752
+julia&gt; block(t, SU₂(1)) |&gt; disp
+5×3 Array{Float64,2}:
+ -0.369   2.076  -0.725
+  1.892   0.138  -1.316
+  0.283  -0.818  -0.604
+ -0.697   0.531  -0.654
+  0.122  -0.342   0.059
+julia&gt; block(t, SU₂(2)) |&gt; disp
+1×1 Array{Float64,2}:
+ 0.22</code></pre><p>Note that the basis transforms <code>u</code> and <code>v</code> are no longer permutation matrices, but are still unitary. Furthermore, note that they render the tensor block diagonal, but that now every element of the diagonal blocks labeled by <code>c</code> comes itself in a tensor product with an identity matrix of size <code>dim(c)</code>, i.e. <code>dim(SU₂(1)) = 3</code> and <code>dim(SU₂(2)) = 5</code>.</p><h2 id="Index-manipulations-1"><a class="docs-heading-anchor" href="#Index-manipulations-1">Index manipulations</a><a class="docs-heading-anchor-permalink" href="#Index-manipulations-1" title="Permalink"></a></h2><p>TODO</p><h2 id="Linear-algebra-operations-1"><a class="docs-heading-anchor" href="#Linear-algebra-operations-1">Linear algebra operations</a><a class="docs-heading-anchor-permalink" href="#Linear-algebra-operations-1" title="Permalink"></a></h2><p>TODO</p><h2 id="Tensor-contractions-and-tensor-networks-1"><a class="docs-heading-anchor" href="#Tensor-contractions-and-tensor-networks-1">Tensor contractions and tensor networks</a><a class="docs-heading-anchor-permalink" href="#Tensor-contractions-and-tensor-networks-1" title="Permalink"></a></h2><p>TODO</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../sectors/">« Sectors, representation spaces and fusion trees</a><a class="docs-footer-nextpage" href="../../lib/spaces/">Vector spaces, symmetry sectors an fusion trees »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 31 January 2020 03:44">Friday 31 January 2020</span>. Using Julia version 1.0.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
