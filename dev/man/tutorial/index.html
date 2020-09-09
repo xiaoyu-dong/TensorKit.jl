@@ -2,24 +2,24 @@
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tutorial · TensorKit.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TensorKit.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../intro/">Introduction</a></li><li class="is-active"><a class="tocitem" href>Tutorial</a><ul class="internal"><li><a class="tocitem" href="#Cartesian-tensors"><span>Cartesian tensors</span></a></li><li><a class="tocitem" href="#Complex-tensors"><span>Complex tensors</span></a></li><li><a class="tocitem" href="#Symmetries"><span>Symmetries</span></a></li></ul></li><li><a class="tocitem" href="../categories/">Optional introduction to category theory</a></li><li><a class="tocitem" href="../spaces/">Vector spaces</a></li><li><a class="tocitem" href="../sectors/">Sectors, representation spaces and fusion trees</a></li><li><a class="tocitem" href="../tensors/">Tensors and the <code>TensorMap</code> type</a></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/sectors/">Symmetry sectors an fusion trees</a></li><li><a class="tocitem" href="../../lib/spaces/">Vector spaces</a></li><li><a class="tocitem" href="../../lib/tensors/">Tensors</a></li></ul></li><li><span class="tocitem">Index</span><ul><li><a class="tocitem" href="../../index/">Index</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Tutorial</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tutorial</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/Jutho/TensorKit.jl/blob/master/docs/src/man/tutorial.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="s_tutorial"><a class="docs-heading-anchor" href="#s_tutorial">Tutorial</a><a id="s_tutorial-1"></a><a class="docs-heading-anchor-permalink" href="#s_tutorial" title="Permalink"></a></h1><p>Before discussing at length all aspects of this package, both its usage and implementation, we start with a short tutorial to sketch the main capabilities. Thereto, we start by loading TensorKit.jl</p><pre><code class="language-julia-repl">julia&gt; using TensorKit</code></pre><h2 id="Cartesian-tensors"><a class="docs-heading-anchor" href="#Cartesian-tensors">Cartesian tensors</a><a id="Cartesian-tensors-1"></a><a class="docs-heading-anchor-permalink" href="#Cartesian-tensors" title="Permalink"></a></h2><p>The most important objects in TensorKit.jl are tensors, which we now create with random (normally distributed) entries in the following manner</p><pre><code class="language-julia-repl">julia&gt; A = Tensor(randn, ℝ^3 ⊗ ℝ^2 ⊗ ℝ^4)
 TensorMap((ℝ^3 ⊗ ℝ^2 ⊗ ℝ^4) ← ProductSpace{CartesianSpace, 0}()):
 [:, :, 1] =
-  0.019901680861135917  -0.45510456983903413
-  0.7890264252660939    -0.12186670037607919
- -0.841765584509467     -0.3656931610370536
+ -0.3426723071020928    -0.4875795750294191
+ -0.021492136651128313   1.7828135941011105
+  0.09125052768272036    0.38428440883337395
 
 [:, :, 2] =
-  0.8294854304948642   0.4789762401069272
- -1.3186168237027929  -1.145913981566076
-  0.2957547032520489   1.4187208640567925
+ -2.0002130688337623    1.1294779899280392
+ -0.9574216523522512    0.3490980622359483
+  0.38980513517183707  -0.9887117565172461
 
 [:, :, 3] =
- -0.5635720476887343    1.8507288171043226
- -0.16534642397936974  -0.8779778504295368
- -1.433447174678321     0.4358060150897775
+ -1.0262685369917988   -1.1357963394957777
+ -0.4516032693314434   -0.7015874411187238
+  0.24146177048417047  -0.662771555551762
 
 [:, :, 4] =
- -0.17310798992492468  -0.12111200837174477
- -0.980704411786342     1.8123551435809226
- -0.1087700495876115   -0.4712542788026829</code></pre><p>Note that we entered the tensor size not as plain dimensions, by specifying the vector space associated with these tensor indices, in this case <code>ℝ^n</code>, which can be obtained by typing <code>\bbR+TAB</code>. The tensor then lives in the tensor product of the different spaces, which we can obtain by typing <code>⊗</code> (i.e. <code>\otimes+TAB</code>), although for simplicity also the usual multiplication sign <code>*</code> does the job. Note also that <code>A</code> is printed as an instance of a parametric type <code>TensorMap</code>, which we will discuss below and contains <code>Tensor</code>.</p><p>Briefly sidetracking into the nature of <code>ℝ^n</code>:</p><pre><code class="language-julia-repl">julia&gt; V = ℝ^3
+ -1.5445256626326505    -1.1448383201653016
+ -1.6494675071578733     1.3544598081908468
+ -0.018778084134591366  -0.746847396947052</code></pre><p>Note that we entered the tensor size not as plain dimensions, by specifying the vector space associated with these tensor indices, in this case <code>ℝ^n</code>, which can be obtained by typing <code>\bbR+TAB</code>. The tensor then lives in the tensor product of the different spaces, which we can obtain by typing <code>⊗</code> (i.e. <code>\otimes+TAB</code>), although for simplicity also the usual multiplication sign <code>*</code> does the job. Note also that <code>A</code> is printed as an instance of a parametric type <code>TensorMap</code>, which we will discuss below and contains <code>Tensor</code>.</p><p>Briefly sidetracking into the nature of <code>ℝ^n</code>:</p><pre><code class="language-julia-repl">julia&gt; V = ℝ^3
 ℝ^3
 
 julia&gt; typeof(V)
@@ -53,31 +53,31 @@ VectorSpace</code></pre><p>i.e. the tensor product of a number of <code>Cartesia
 julia&gt; C = 0.5*A + 2.5*B
 TensorMap((ℝ^3 ⊗ ℝ^2 ⊗ ℝ^4) ← ProductSpace{CartesianSpace, 0}()):
 [:, :, 1] =
- 3.111991520706072   -0.5193185737102056
- 1.0017288261684714  -1.4643220446055902
- 1.8140173233657233  -1.8143030758138659
+  3.1105504884997357  -0.7211188611716896
+ -3.035444697465935   -0.19696393601493511
+ -2.036872518370825   -3.141083651916342
 
 [:, :, 2] =
-  2.2730612979000355   6.4487720784538425
- -0.994683952306958   -2.5301625631200833
-  3.479678879606789   -2.8356968131144287
+ -4.867258801235072     1.5303401660751803
+ -0.24441263085355674  -0.25062989508729094
+ -1.5718415558573418    2.18275441916889
 
 [:, :, 3] =
-  2.088475042482442   -3.429972740370661
- -1.7565009086272934  -1.0584334437681024
-  2.688790748093358   -0.11430305822890999
+  0.03530698642228025   1.1749011420938404
+ -0.5724501314610512    1.5208497334114606
+  1.4295087752667828   -0.2962459301767358
 
 [:, :, 4] =
- 3.263188553226634     7.764799796644081
- 0.9464282733463332    2.470000730021905
- 0.22343179435357513  -1.7522631345211381</code></pre><p>Given that they are behave as vectors, they also have a scalar product and norm, which they inherit from the Euclidean inner product on the individual <code>ℝ^n</code> spaces:</p><pre><code class="language-julia-repl">julia&gt; scalarBA = dot(B,A)
--4.121432744622534
+ -1.5410086273947357   3.895303417413204
+ -0.6013640422949189   1.3649523233118788
+ -2.9934448178056976  -2.4078048096541873</code></pre><p>Given that they are behave as vectors, they also have a scalar product and norm, which they inherit from the Euclidean inner product on the individual <code>ℝ^n</code> spaces:</p><pre><code class="language-julia-repl">julia&gt; scalarBA = dot(B,A)
+-1.7263644849744475
 
 julia&gt; scalarAA = dot(A,A)
-19.06745562164069
+23.481296238247307
 
 julia&gt; normA² = norm(A)^2
-19.067455621640693</code></pre><p>If two tensors live on different spaces, these operations have no meaning and are thus not allowed</p><pre><code class="language-julia-repl">julia&gt; B′ = Tensor(randn, ℝ^4 * ℝ^2 * ℝ^3);
+23.4812962382473</code></pre><p>If two tensors live on different spaces, these operations have no meaning and are thus not allowed</p><pre><code class="language-julia-repl">julia&gt; B′ = Tensor(randn, ℝ^4 * ℝ^2 * ℝ^3);
 
 julia&gt; space(B′) == space(A)
 false
@@ -90,37 +90,37 @@ ERROR: SpaceMismatch()</code></pre><p>However, in this particular case, we can r
 true</code></pre><p>We can contract two tensors using Einstein summation convention, which takes the interface from <a href="https://github.com/Jutho/TensorOperations.jl">TensorOperations.jl</a>. TensorKit.jl reexports the <code>@tensor</code> macro</p><pre><code class="language-julia-repl">julia&gt; @tensor D[a,b,c,d] := A[a,b,e]*B[d,c,e]
 TensorMap((ℝ^3 ⊗ ℝ^2 ⊗ ℝ^2 ⊗ ℝ^3) ← ProductSpace{CartesianSpace, 0}()):
 [:, :, 1, 1] =
- -0.12499842752975493  1.3837415880767154
- -1.4719358257878419   0.5929510850834906
- -2.329432126917006    0.38257352182201365
+  2.8940065767016065   -2.2843488748981247
+  1.8609215620594475    1.2299847907534092
+ -0.42443950182366325   2.1181285246433452
 
 [:, :, 2, 1] =
-  2.4978474399989077  -2.360563548589583
- -6.148839654970068    4.370585870137239
-  2.989602059018576    1.3320492430114579
+ -4.18277316052822    -2.308369565099557
+ -3.6282582946685102   1.7258901168555016
+  0.2679055608652936  -2.251966455632767
 
 [:, :, 1, 2] =
-  0.1713999234199622   -1.4835184153813625
- -0.08438181437811541   1.7535409169898388
-  0.6530971197495028   -0.8417648002575097
+  0.2314353358284953    0.7509663262378706
+ -0.14848336617101623  -1.90597250399291
+ -0.10902860851820623  -0.5324288915292339
 
 [:, :, 2, 2] =
- -0.6292047873704775   -0.653835177032034
-  0.01690723831141599   2.31675083640214
-  0.5281261695694912   -1.3081738938819165
+ -0.7038443038616455   -1.1450798649778537
+ -0.6196596658730537   -0.9881681772441203
+  0.06958596006131856  -0.7007840971302189
 
 [:, :, 1, 3] =
-  0.33632563801407284   2.7391108310490138
- -1.3862080385439401   -2.6307125088608503
- -2.3230836326360205    2.1051319687474774
+  3.0053088633897533   0.3798564189038861
+  2.4269324290100265  -3.7157912201066816
+ -0.2026641105851105   0.9230971147534025
 
 [:, :, 2, 3] =
- -1.009311280127478    -0.5546621566185733
-  1.9718442137850725    0.7216549613529774
-  0.38640039824211775  -1.5451561578911994
+ -0.4425983582135979    2.7752302990754205
+  0.33931642044390187  -3.115234990820487
+  0.31443177302639186  -0.9726858425762509
 
 julia&gt; @tensor d = A[a,b,c]*A[a,b,c]
-19.06745562164069
+23.481296238247307
 
 julia&gt; d ≈ scalarAA ≈ normA²
 true</code></pre><p>We hope that the index convention is clear. The <code>:=</code> is to create a new tensor <code>D</code>, without the <code>:</code> the result would be written in an existing tensor <code>D</code>, which in this case would yield an error as no tensor <code>D</code> exists. If the contraction yields a scalar, regular assignment with <code>=</code> can be used.</p><p>Finally, we can factorize a tensor, creating a bipartition of a subset of its indices and its complement. With a plain Julia <code>Array</code>, one would apply <code>permutedims</code> and <code>reshape</code> to cast the array into a matrix before applying e.g. the singular value decomposition. With TensorKit.jl, one just specifies which indices go to the left (rows) and right (columns)</p><pre><code class="language-julia-repl">julia&gt; U, S, Vd = tsvd(A, (1,3), (2,));
@@ -133,14 +133,14 @@ true
 julia&gt; U
 TensorMap((ℝ^3 ⊗ ℝ^4) ← ProductSpace(ℝ^2)):
 [:, :, 1] =
- 0.1312121819345425   -0.10175317979146833  …   0.027294312342550895
- 0.06862540866333833   0.27189105997989854     -0.5610457307168146
- 0.06877921567046097  -0.3937448030495304       0.13033962723644307
+  0.03268541349874847  -0.5925908822531376   …  -0.06013701370205102
+ -0.35527972195166635  -0.24590690988038133     -0.572037848166129
+ -0.05884254617789833   0.2669373980020622       0.1436926145877624
 
 [:, :, 2] =
- -0.01775802154477789   0.33335954484935404  …  -0.07073752490054723
-  0.2852225222074091   -0.5511593845441813      -0.26283035885750283
- -0.3316500990960198    0.18774668277032402     -0.06625963113880483</code></pre><p>Note that the <code>tsvd</code> routine returns the decomposition of the linear map as three factors, <code>U</code>, <code>S</code> and <code>Vd</code>, each of them a <code>TensorMap</code>, such that <code>Vd</code> is already what is commonly called <code>V&#39;</code>. Furthermore, observe that <code>U</code> is printed differently then <code>A</code>, i.e. as a <code>TensorMap((ℝ^3 ⊗ ℝ^4) ← ProductSpace(ℝ^2))</code>. What this means is that tensors (or more appropriately, <code>TensorMap</code> instances) in TensorKit.jl are always considered to be linear maps between two <code>ProductSpace</code> instances, with</p><pre><code class="language-julia-repl">julia&gt; codomain(U)
+  0.18648213222152954  0.21896476999316736  …  0.6102498717044318
+ -0.38493986134984     0.14670384946802337     0.08803859905788759
+ -0.10531245940064973  0.12543965915791        0.16772962938036445</code></pre><p>Note that the <code>tsvd</code> routine returns the decomposition of the linear map as three factors, <code>U</code>, <code>S</code> and <code>Vd</code>, each of them a <code>TensorMap</code>, such that <code>Vd</code> is already what is commonly called <code>V&#39;</code>. Furthermore, observe that <code>U</code> is printed differently then <code>A</code>, i.e. as a <code>TensorMap((ℝ^3 ⊗ ℝ^4) ← ProductSpace(ℝ^2))</code>. What this means is that tensors (or more appropriately, <code>TensorMap</code> instances) in TensorKit.jl are always considered to be linear maps between two <code>ProductSpace</code> instances, with</p><pre><code class="language-julia-repl">julia&gt; codomain(U)
 (ℝ^3 ⊗ ℝ^4)
 
 julia&gt; domain(U)
@@ -152,100 +152,100 @@ julia&gt; codomain(A)
 julia&gt; domain(A)
 ProductSpace{CartesianSpace, 0}()</code></pre><p>Hence, a <code>Tensor</code> instance such as <code>A</code> is just a specific case of <code>TensorMap</code> with an empty domain, i.e. a <code>ProductSpace{CartesianSpace,0}</code> instance. In particular, we can represent a vector <code>v</code> and matrix <code>m</code> as</p><pre><code class="language-julia-repl">julia&gt; v = Tensor(randn, ℝ^3)
 TensorMap(ProductSpace(ℝ^3) ← ProductSpace{CartesianSpace, 0}()):
- -0.755723117999191
-  0.8660297398280029
- -1.0330357146663411
+ -0.20757645351801243
+  2.1419783995011317
+ -0.9687480804297844
 
 julia&gt; m1 = TensorMap(randn, ℝ^4, ℝ^3)
 TensorMap(ProductSpace(ℝ^4) ← ProductSpace(ℝ^3)):
- -1.070156547324409    -1.7188576264056232   -0.6261207323389073
-  0.9389821451092578   -0.3062019317082849    0.7563275103555015
- -0.32301160776504395   0.24657470203348844   0.167269607312745
-  0.21970687592928803   0.34793613129105727   2.028344666248806
+ -1.266271314501769     -0.6585823331392651   0.31497369766891425
+  0.44319168460067093   -0.4148734852588869  -0.47185662858070293
+ -0.08542764662916025   -0.836670564441861    0.07701194440422421
+  0.034300244657666276   0.9555465884284684   0.49641333575940016
 
 julia&gt; m2 = TensorMap(randn, ℝ^4 → ℝ^2) # alternative syntax for TensorMap(randn, ℝ^2, ℝ^4)
 TensorMap(ProductSpace(ℝ^2) ← ProductSpace(ℝ^4)):
- 0.1835513188692663  0.4688208138976997  …   1.5306725406419706
- 0.3318143010151609  0.2080306602044694     -0.2329930918167775
+  0.08155834013396282  -0.41695974568679184  …   0.14733806534419594
+ -0.15802713354732806   0.6030702309127443      -0.7719736308108026
 
 julia&gt; w = m1 * v # matrix vector product
 TensorMap(ProductSpace(ℝ^4) ← ProductSpace{CartesianSpace, 0}()):
- -0.0330347021070533
- -1.756103823881605
-  0.2848528860880803
- -1.9600670099523834
+ -1.452951188224127
+ -0.523535998892742
+ -1.8490026819249723
+  1.558740762873274
 
 julia&gt; m3 = m2*m1 # matrix matrix product
 TensorMap(ProductSpace(ℝ^2) ← ProductSpace(ℝ^3)):
- 0.5715376206063831    0.0800486088292216   3.348814490176486
- 0.06607733082496518  -0.9265769292591668  -0.6664618372466898</code></pre><p>Note that for the construction of <code>m1</code>, in accordance with how one specifies the dimensions of a matrix (e.g. <code>randn(4,3)</code>), the first space is the codomain and the second the domain. This is somewhat opposite to the general notation for a function <code>f:domain→codomain</code>, so that we also support this more mathemical notation, as illustrated in the construction of <code>m2</code>. In fact, there is a third syntax which mixes both and reads as <code>TensorMap(randn, codomain←domain)</code>.</p><p>This &#39;matrix vector&#39; or &#39;matrix matrix&#39; product can be computed between any two <code>TensorMap</code> instances for which the domain of the first matches with the codomain of the second, e.g.</p><pre><code class="language-julia-repl">julia&gt; v′ = v ⊗ v
+ -0.3847119590166681   -0.7359560721557021   0.38725364503463094
+  0.47296178519389953  -0.5697906549590801  -0.7464565250982953</code></pre><p>Note that for the construction of <code>m1</code>, in accordance with how one specifies the dimensions of a matrix (e.g. <code>randn(4,3)</code>), the first space is the codomain and the second the domain. This is somewhat opposite to the general notation for a function <code>f:domain→codomain</code>, so that we also support this more mathemical notation, as illustrated in the construction of <code>m2</code>. In fact, there is a third syntax which mixes both and reads as <code>TensorMap(randn, codomain←domain)</code>.</p><p>This &#39;matrix vector&#39; or &#39;matrix matrix&#39; product can be computed between any two <code>TensorMap</code> instances for which the domain of the first matches with the codomain of the second, e.g.</p><pre><code class="language-julia-repl">julia&gt; v′ = v ⊗ v
 TensorMap((ℝ^3 ⊗ ℝ^3) ← ProductSpace{CartesianSpace, 0}()):
-  0.5711174310784192  -0.6544786952628465   0.78068897129217
- -0.6544786952628465   0.7500075102665584  -0.8946396512055265
-  0.78068897129217    -0.8946396512055265   1.0671627877761982
+  0.043087984055115575  -0.44462427968063334   0.20108929088799693
+ -0.44462427968063334    4.588071463929429    -2.0750374628387833
+  0.20108929088799693   -2.0750374628387833    0.9384728433363921
 
 julia&gt; m1′ = m1 ⊗ m1
 TensorMap((ℝ^4 ⊗ ℝ^4) ← (ℝ^3 ⊗ ℝ^3)):
 [:, :, 1, 1] =
-  1.1452350357813001  -1.0048578904093906   …  -0.2351207517679192
- -1.0048578904093906   0.8816874688339833       0.20630083365533644
-  0.3456729869115457  -0.30330213235441117     -0.07096787123095437
- -0.2351207517679192   0.20630083365533644      0.04827111133060757
+  1.603443041930038    -0.561200917035545     …  -0.04343341589039536
+ -0.561200917035545     0.1964188692991806        0.015201583212046281
+  0.10817457839189937  -0.03786082262104836      -0.002930189179908856
+ -0.04343341589039536   0.015201583212046281      0.0011765067835757639
 
 [:, :, 2, 1] =
-  1.8394467428164707   -1.6139766211797593   …  -0.3776448392648108
-  0.3276840020210027   -0.28751814667204384     -0.06727466981914049
- -0.26387353178570294   0.23152924264508104      0.05417415746697281
- -0.3723461289518501    0.32670581492069334      0.0764439604288808
+  0.8339439166918992  -0.29187821367223116  …  -0.02258953515389347
+  0.525342393530701   -0.1838684788280377      -0.014230262046358523
+  1.0594519354407324  -0.3708054369107826      -0.028698005058223574
+ -1.2099812345969976   0.42349030224003686      0.03277548176489481
 
 [:, :, 3, 1] =
-  0.6700472011280355   -0.5879161883489666  …  -0.13756303005673925
- -0.8093888371285097    0.7101780280787532      0.16617035447958348
- -0.17900466543411692   0.1570631746861045      0.036750282860602
- -2.170646324816703     1.9045794257352255      0.4456412699293596
+ -0.39884215818069885   0.13959372367478853  …   0.010803674890773569
+  0.5974985133292596   -0.2091229341106748      -0.016184797803659674
+ -0.09751801607307414   0.03413105337488134      0.0026415285346274835
+ -0.6285939672082637    0.22000626253344704      0.01702709886787566
 
 [:, :, 1, 2] =
-  1.8394467428164707   0.3276840020210027   …  -0.3723461289518501
- -1.6139766211797593  -0.28751814667204384      0.32670581492069334
-  0.5552109654244877   0.0989067782618553      -0.11238740916787382
- -0.3776448392648108  -0.06727466981914049      0.0764439604288808
+  0.8339439166918992    0.525342393530701     …  -1.2099812345969976
+ -0.29187821367223116  -0.1838684788280377        0.42349030224003686
+  0.05626113883162903   0.03544166549450431      -0.08163009629396682
+ -0.02258953515389347  -0.014230262046358523      0.03277548176489481
 
 [:, :, 2, 2] =
-  2.954471539852773     0.5263175255369194   …  -0.598052672771702
-  0.5263175255369194    0.09375962298188517     -0.10653871551242917
- -0.42382680706895576  -0.07550165007304893      0.08579224789977716
- -0.598052672771702    -0.10653871551242917      0.12105955145778784
+  0.4337306895231579    0.27322834787941624  …  -0.6293061016304857
+  0.27322834787941624   0.17212000877085584     -0.39643094346855784
+  0.5510164523990667    0.347112433083515       -0.7994777034909414
+ -0.6293061016304857   -0.39643094346855784      0.9130692826572848
 
 [:, :, 3, 2] =
-  1.0762123958314047   0.19171937772477943  …  -0.217850025331123
- -1.3000193092349317  -0.23158894467497243      0.2631536679420903
- -0.2875126401953856  -0.05121827687524878      0.05819914005097084
- -3.486435698560929   -0.6210830549755809       0.7057343960994603
+ -0.20743611268829504  -0.13067423571678138   …   0.30097204225223084
+  0.310756439357907     0.19576080404178434      -0.4508809916676496
+ -0.05071870602532535  -0.031950213781544126      0.07358850074369933
+ -0.3269290528658711   -0.20594873073549239       0.4743460694352906
 
 [:, :, 1, 3] =
-  0.6700472011280355   -0.8093888371285097   …  -2.170646324816703
- -0.5879161883489666    0.7101780280787532       1.9045794257352255
-  0.2022442644078172   -0.24430256511686346     -0.6551788717466783
- -0.13756303005673925   0.16617035447958348      0.4456412699293596
+ -0.39884215818069885    0.5974985133292596    …  -0.6285939672082637
+  0.13959372367478853   -0.2091229341106748        0.22000626253344704
+ -0.02690746174193996    0.040309601326019205     -0.042407423029256715
+  0.010803674890773569  -0.016184797803659674      0.01702709886787566
 
 [:, :, 2, 3] =
-  1.0762123958314047   -1.3000193092349317   …  -3.486435698560929
-  0.19171937772477943  -0.23158894467497243     -0.6210830549755809
- -0.15438553301345564   0.18649123050563793      0.5001384817015149
- -0.217850025331123     0.2631536679420903       0.7057343960994603
+ -0.20743611268829504   0.310756439357907    …  -0.3269290528658711
+ -0.13067423571678138   0.19576080404178434     -0.20594873073549239
+ -0.26352922141299057   0.3947885517702503      -0.41533442582628444
+  0.30097204225223084  -0.4508809916676496       0.4743460694352906
 
 [:, :, 3, 3] =
-  0.3920271714646096   -0.4735523346718491   …  -1.269988647867419
- -0.4735523346718491    0.5720313029205513       1.53409287156682
- -0.10473096902869736   0.12651060565699082      0.3392804158183386
- -1.269988647867419     1.53409287156682         4.114182085099981
+  0.0992084302232286   -0.1486224270736515   …   0.15635714393629851
+ -0.1486224270736515    0.22264867793554743     -0.23423592299393106
+  0.02425673689367135  -0.03633859644702177      0.03822975621501841
+  0.15635714393629851  -0.23423592299393106      0.24642619991977496
 
 julia&gt; w′ = m1′ * v′
 TensorMap((ℝ^4 ⊗ ℝ^4) ← ProductSpace{CartesianSpace, 0}()):
-  0.0010912915433025638   0.05801236669098597  …   0.06475022978363953
-  0.05801236669098597     3.0839006402515956       3.4420811712415644
- -0.009410030236254113   -0.500231242502989       -0.5583307447109702
-  0.06475022978363953     3.442081171241565        3.841862683503677
+  2.1110671553619023   0.7606722516693145   …  -2.2647742435501055
+  0.7606722516693146   0.27408994213662097     -0.8160569023056936
+  2.6865106437324866   0.9680194660369492      -2.882115850978461
+ -2.2647742435501055  -0.8160569023056935       2.429672765842756
 
 julia&gt; w′ ≈ w ⊗ w
 true</code></pre><p>Another example involves checking that <code>U</code> from the singular value decomposition is a unitary, or at least a left isometric tensor</p><pre><code class="language-julia-repl">julia&gt; codomain(U)
@@ -259,8 +259,8 @@ julia&gt; space(U)
 
 julia&gt; U&#39;*U # should be the identity on the corresponding domain = codomain
 TensorMap(ProductSpace(ℝ^2) ← ProductSpace(ℝ^2)):
- 1.0000000000000002     4.870803126587628e-17
- 4.870803126587628e-17  1.0000000000000002
+  1.0000000000000002     -1.910088106204355e-16
+ -1.910088106204355e-16   1.0
 
 julia&gt; U&#39;*U ≈ one(U&#39;*U)
 true
@@ -268,87 +268,87 @@ true
 julia&gt; P = U*U&#39; # should be a projector
 TensorMap((ℝ^3 ⊗ ℝ^4) ← (ℝ^3 ⊗ ℝ^4)):
 [:, :, 1, 1] =
- 0.017531984017208277  -0.019271062718808536  …   0.004837504768077198
- 0.003939501912451218   0.045462919453800155     -0.06894868731719979
- 0.014914120564942502  -0.05499812437111159       0.018278786839540553
+  0.03584392189347219   0.02146393916769067  …   0.11183509410392585
+ -0.08339687074128871   0.01932007762226356     -0.002279667934133001
+ -0.021562184931670232  0.03211721433688637      0.03597523144809458
 
 [:, :, 2, 1] =
-  0.003939501912451218   0.08809879663786303   …  -0.018302851928151134
-  0.08606133388856618   -0.13854443469494593      -0.11346713041527809
- -0.08987407597157467    0.026528684377486452     -0.009954128929814409
+ -0.08339687074128871   0.12624725567631792  …  -0.2135440394955934
+  0.2744023776860874    0.03089357909458664      0.16934388152751445
+  0.06144452696510857  -0.143124169544691       -0.11561689243518572
 
 [:, :, 3, 1] =
-  0.014914120564942502  -0.1175572299819249   …  0.025337388538258888
- -0.08987407597157467    0.2014925183550067      0.04857942924657009
-  0.11472236873864353   -0.08934766467379378     0.030939670565353145
+ -0.021562184931670232   0.01180983790350372    …  -0.06072829983236084
+  0.06144452696510857   -0.0009799544909196184      0.024388602107247175
+  0.014553159345711596  -0.028917635180843105      -0.026119259093709015
 
 [:, :, 1, 2] =
- -0.019271062718808536   0.12148229573984337  …  -0.026358312175692348
-  0.08809879663786303   -0.2114000214809259      -0.03052882169246577
- -0.1175572299819249     0.10265193445194644     -0.035350752002460815
+ 0.02146393916769067   0.3991095242277127   …   0.16925986880188823
+ 0.12624725567631792   0.17784516733403596      0.3582617647201838
+ 0.01180983790350372  -0.1307178020728659      -0.04842405353351148
 
 [:, :, 2, 2] =
-  0.045462919453800155  -0.2114000214809259   …   0.0464087302026029
- -0.13854443469494593    0.37770141566811355     -0.007681899594363864
-  0.2014925183550067    -0.21053403798861667      0.0719577969252895
+  0.01932007762226356     0.17784516733403596  …   0.10431411252531304
+  0.03089357909458664     0.08199222777565444      0.15358366096071957
+ -0.0009799544909196184  -0.0472392697997744      -0.010728424525964916
 
 [:, :, 3, 2] =
- -0.05499812437111159    0.10265193445194644  …  -0.024027729285151005
-  0.026528684377486452  -0.21053403798861667      0.17156331273604203
- -0.08934766467379378    0.19028378681977418     -0.06376057680365836
+  0.03211721433688637   -0.1307178020728659   …   0.06049671794652237
+ -0.143124169544691     -0.0472392697997744      -0.14165476288960385
+ -0.028917635180843105   0.08699068254176398      0.05939688019032594
 
 [:, :, 1, 3] =
- -0.07083051908540289    0.020934088975789984  …  -0.007602637311663487
- -0.0683715816058891    -0.0920596689181269        0.33889516624038435
- -0.002841343130842814   0.19824797714283846      -0.06518792144569437
+  0.09202518181380433   0.08662974981031384  …  0.2954721317074197
+ -0.19973284069639247   0.0631723679470216      0.023497418904952282
+ -0.053340845565692865  0.07021941433128798     0.0866521222422065
 
 [:, :, 2, 3] =
-  0.03401864583021456   -0.06142220073017157  …   0.014427423795170993
- -0.014499395445053536   0.12688882344892755     -0.10831575009887016
-  0.053175099396504596  -0.11682662713929655      0.039123322705685255
+  0.050025349220718184  0.024222417177004303  …   0.15456355036562017
+ -0.11900764759456997   0.02449574463537598      -0.008519910606811763
+ -0.030460099108810194  0.047050054428098585      0.0512471960880097
 
 [:, :, 3, 3] =
- -0.015425648014551669  -0.14985698722040988   …  0.030737823921312763
- -0.1571890824655028     0.22847619380787873      0.23748527189211346
-  0.15512753470539173   -0.021791330319840013     0.009294869384219705
+  0.022271408986132814  -0.08443813593361063   …   0.04359471822184845
+ -0.09641697718793087   -0.030085671161182586     -0.09245020842680021
+ -0.019655419785700467   0.057913301019393355      0.04006392129337332
 
 [:, :, 1, 4] =
-  0.004837504768077198  -0.026358312175692348  …  0.0057487769153082655
- -0.018302851928151134   0.0464087302026029       0.0032786116416629314
-  0.025337388538258888  -0.024027729285151005     0.008244572803985412
+  0.11183509410392585  0.16925986880188823  …  0.3760213663322761
+ -0.2135440394955934   0.10431411252531304     0.08812619169337209
+ -0.06072829983236084  0.06049671794652237     0.0937157400780515
 
 [:, :, 2, 4] =
- -0.06894868731719979  -0.03052882169246577   …   0.0032786116416629314
- -0.11346713041527809  -0.007681899594363864      0.3838521094927282
-  0.04857942924657009   0.17156331273604203      -0.05571144877424959
+ -0.002279667934133001   0.3582617647201838   …   0.08812619169337209
+  0.16934388152751445    0.15358366096071957      0.3349780946586108
+  0.024388602107247175  -0.14165476288960385     -0.06743093245500253
 
 [:, :, 3, 4] =
-  0.018278786839540553  -0.035350752002460815  …   0.008244572803985412
- -0.009954128929814409   0.0719577969252895       -0.05571144877424959
-  0.030939670565353145  -0.06376057680365836       0.021378757146785405
+  0.03597523144809458   -0.04842405353351148   …   0.0937157400780515
+ -0.11561689243518572   -0.010728424525964916     -0.06743093245500253
+ -0.026119259093709015   0.05939688019032594       0.048780796059141644
 
 julia&gt; P*P ≈ P
 true</code></pre><p>Here, the adjoint of a <code>TensorMap</code> results in a new tensor map (actually a simple wrapper of type <code>AdjointTensorMap &lt;: AbstractTensorMap</code>) with domain and codomain interchanged.</p><p>Our original tensor <code>A</code> living in <code>ℝ^4 * ℝ^2 * ℝ^3</code> is isomorphic to e.g. a linear map <code>ℝ^3 → ℝ^4 * ℝ^2</code>. This is where the full power of <code>permute</code> emerges. It allows to specify a permutation where some indices go to the codomain, and others go to the domain, as in</p><pre><code class="language-julia-repl">julia&gt; A2 = permute(A,(1,2),(3,))
 TensorMap((ℝ^3 ⊗ ℝ^2) ← ProductSpace(ℝ^4)):
 [:, :, 1] =
-  0.019901680861135917  -0.45510456983903413
-  0.7890264252660939    -0.12186670037607919
- -0.841765584509467     -0.3656931610370536
+ -0.3426723071020928    -0.4875795750294191
+ -0.021492136651128313   1.7828135941011105
+  0.09125052768272036    0.38428440883337395
 
 [:, :, 2] =
-  0.8294854304948642   0.4789762401069272
- -1.3186168237027929  -1.145913981566076
-  0.2957547032520489   1.4187208640567925
+ -2.0002130688337623    1.1294779899280392
+ -0.9574216523522512    0.3490980622359483
+  0.38980513517183707  -0.9887117565172461
 
 [:, :, 3] =
- -0.5635720476887343    1.8507288171043226
- -0.16534642397936974  -0.8779778504295368
- -1.433447174678321     0.4358060150897775
+ -1.0262685369917988   -1.1357963394957777
+ -0.4516032693314434   -0.7015874411187238
+  0.24146177048417047  -0.662771555551762
 
 [:, :, 4] =
- -0.17310798992492468  -0.12111200837174477
- -0.980704411786342     1.8123551435809226
- -0.1087700495876115   -0.4712542788026829
+ -1.5445256626326505    -1.1448383201653016
+ -1.6494675071578733     1.3544598081908468
+ -0.018778084134591366  -0.746847396947052
 
 julia&gt; codomain(A2)
 (ℝ^3 ⊗ ℝ^2)
@@ -378,75 +378,75 @@ true</code></pre><p>As illustrated for <code>A2′</code> and <code>A2′′</co
 └ @ TensorKit ~/work/TensorKit.jl/TensorKit.jl/src/tensors/tensor.jl:30
 TensorMap((ℝ^3 ⊗ ℝ^2 ⊗ ℝ^4) ← ProductSpace{CartesianSpace, 0}()):
 [:, :, 1] =
-   -0.649707536395257 + 0.305182863598453im    …  0.3359265034263962 - 0.8896654986398412im
- 0.058167758880133986 + 0.09291225204005639im     0.4721495681730178 - 0.17890293286539763im
-   0.4429677824944689 + 0.7582242491578547im       1.103061273500095 + 0.5907495302055494im
+  0.4306676329010976 + 0.08359941263705352im  …   -1.0688469991551803 - 0.61753232063026im
+  0.6247979957877101 - 0.37250625468538795im     -0.11788896153231737 + 0.6053517987682857im
+ -0.9612153324279114 - 0.07923625997030509im       0.5288859124836165 + 1.436495384460559im
 
 [:, :, 2] =
- 1.4175368771861483 + 0.3440403007349965im   …    0.3825487131109026 - 0.3118783963033059im
- 0.5439294376153552 - 0.2997433300156774im       -1.3458557957202133 - 0.11846316839736855im
- 0.7031599724757965 + 0.03806394945955844im     -0.23936595400261992 - 0.8248806734234336im
+  0.9853412168169111 + 0.9654840206740787im   …      1.37786137879935 - 0.5523682257820238im
+  -0.840188843126627 - 0.42479910474015903im     -0.20931328197036242 - 0.3494523107729144im
+ 0.15427720418599633 - 0.42985756559292965im       0.3700874265801807 - 0.22251112099250564im
 
 [:, :, 3] =
-  0.14706739373209152 + 0.9791033946188198im  …  -1.0556885899795625 - 0.8188184878774742im
-  -0.6669003686541948 + 0.190141046787193im       1.1361130685836882 - 1.1634487866083134im
- -0.09739792500511692 + 1.695375025773834im      0.25670968173278136 + 0.15135470913159987im
+  -0.315653132285657 - 1.4274673541660083im  …  -0.38708972566488115 + 0.47031466589696247im
+ 0.06705260168689796 + 0.3069808454410998im      0.04461743765065138 + 0.37533551248904im
+  0.9311958423266071 - 1.4428069397267174im         0.76906479633155 - 0.08874778333514638im
 
 [:, :, 4] =
- -0.5044723186004392 - 0.013102229318096566im  …  -0.5780067611901442 + 1.4622583042261867im
- 0.05233904079824899 + 0.19668788292741413im      -1.2354240358719333 - 0.05542131271306277im
- -0.9403123217334192 - 1.300400709797841im        0.12096792324587015 + 1.1309218175167353im</code></pre><p>although most of the above operations will work in the expected way (at your own risk). Indeed, we instead want to work with complex vector spaces</p><pre><code class="language-julia-repl">julia&gt; A = Tensor(randn, ComplexF64, ℂ^3 ⊗ ℂ^2 ⊗ ℂ^4)
+   0.3007629371376703 - 0.40934101818341495im  …   0.8345956795634618 + 0.10838347521881458im
+ -0.21546520530575233 + 1.3160926028759072im      0.08240775191034341 + 0.006843481571966537im
+  -0.7237387796952476 - 0.4107793825865215im        0.824967806873863 - 0.0017056649673910039im</code></pre><p>although most of the above operations will work in the expected way (at your own risk). Indeed, we instead want to work with complex vector spaces</p><pre><code class="language-julia-repl">julia&gt; A = Tensor(randn, ComplexF64, ℂ^3 ⊗ ℂ^2 ⊗ ℂ^4)
 TensorMap((ℂ^3 ⊗ ℂ^2 ⊗ ℂ^4) ← ProductSpace{ComplexSpace, 0}()):
 [:, :, 1] =
- -0.4261723589504041 + 0.7915214228411709im  …   0.28951864051751336 + 1.0006593972683167im
- 0.19496779787596652 + 0.9290373054606734im       0.3234754504362832 - 0.2581151712529055im
-  1.3089431556199806 - 0.7181521423427832im     -0.20847771225156328 + 0.33079132865390964im
+ -0.03534110005845397 - 0.6177894287953215im   …   -0.6820658291205514 - 0.42533473293599877im
+   0.0672576605745266 - 0.5871621147453887im        0.5636927330878907 - 0.4075530061170448im
+  -0.1205725021782197 + 0.03709423713475697im     -0.06538243481848861 - 1.2038700146960633im
 
 [:, :, 2] =
- 0.5121926679249161 - 0.7858733228730403im  …  -0.7996726890493973 - 0.26525137530096776im
- 0.8879328690588358 - 0.4103677111525907im      1.0177118757118386 + 0.14746147225004183im
- 0.4506010285793716 + 0.4098572289331882im      -1.329569577355477 + 0.3007500354023506im
+  0.6546073957669404 - 1.0957857688745454im   …   1.419269451100164 - 1.1350187846075332im
+ 0.08683338571052164 + 0.41109687737971473im     1.4755835559144226 - 0.23440021189491897im
+ -0.5805649098455229 - 0.611854371931972im       0.2575914831886802 + 0.13425881357794137im
 
 [:, :, 3] =
- -0.4773115834111708 + 0.36913877127953715im  …  -0.4737165749197142 - 0.2927247043141334im
-  0.5007256670778629 - 0.4247515187211212im      -0.8825099605301794 - 0.2683360987358338im
- 0.35648099836570785 - 0.44060982057947123im      0.9957241478486578 - 0.9494176497529514im
+  0.9384155903271982 + 0.8308704043264762im   …     0.6145846516415999 + 0.5586231688593353im
+  0.1886280592032607 + 1.1168734616751792im      -0.005572573177199819 - 1.313343856812432im
+ -0.7328966470316617 - 0.08930301799156154im       -0.2068362957850757 - 0.4792040815407181im
 
 [:, :, 4] =
- -0.4509184374981204 + 0.7584385792790076im    …   0.3885915452452839 + 0.870386251973763im
-  -0.687193125219053 + 0.005651567731168295im     0.04373986028446197 + 0.12017189009498527im
-  0.3807858939218562 - 0.3684734870420923im        1.1568167172607082 + 0.4867371430790129im</code></pre><p>where <code>ℂ</code> is obtained as <code>\bbC+TAB</code> and we also have the non-Unicode alternative <code>ℂ^n == ComplexSpace(n)</code>. Most functionality works exactly the same</p><pre><code class="language-julia-repl">julia&gt; B = Tensor(randn, ℂ^3 * ℂ^2 * ℂ^4);
+ -0.8539446299482625 - 0.28823398921224297im  …    0.0798826207604817 + 0.43099223147317883im
+ -0.4745349079753938 - 0.7842030937734021im       -1.1154019182597998 - 1.0575368748471443im
+ -0.8323188333890225 - 1.0173076283748246im      -0.28637537117364154 - 1.1294202361095615im</code></pre><p>where <code>ℂ</code> is obtained as <code>\bbC+TAB</code> and we also have the non-Unicode alternative <code>ℂ^n == ComplexSpace(n)</code>. Most functionality works exactly the same</p><pre><code class="language-julia-repl">julia&gt; B = Tensor(randn, ℂ^3 * ℂ^2 * ℂ^4);
 
 julia&gt; C = im*A + (2.5-0.8im)*B
 TensorMap((ℂ^3 ⊗ ℂ^2 ⊗ ℂ^4) ← ProductSpace{ComplexSpace, 0}()):
 [:, :, 1] =
- -1.1856002000252541 - 0.30006715025149755im  …   -3.9535509989896704 + 1.2344439530683466im
-  1.4433990292249428 - 0.5642118292234307im       -1.1147108787539726 + 0.7627797864384842im
-   4.262961954343452 + 0.17460401577976659im     -0.01259639129322404 - 0.3103000922069827im
+  -3.600110654185769 + 1.314386926495495im    …   2.3210790143046625 - 1.2887039991585238im
+   2.769211464910934 - 0.6309981314784481im      -1.2473223906563673 + 1.0932528600553826im
+ -0.6637529663319598 + 0.07995829116488522im       4.760911044663145 - 1.2036355644079548im
 
 [:, :, 2] =
-  1.2010325192332894 + 0.3793417250896365im  …   -0.7479054621942873 - 0.47546250105091564im
- 0.24743261004288208 + 0.9400721014139426im      -3.2567579790705263 + 2.012686757894394im
- -2.4691489402090743 + 1.1095743761876553im     -0.31207656488194463 - 1.325945087922007im
+    2.704974044007109 + 0.13966714772452005im  …   3.4654973482561733 + 0.6735163107325991im
+ -0.38730417259013084 + 0.0792197201778548im        3.691350316225377 + 0.3693595225286761im
+    3.340332327179474 - 1.4536778555247234im      -0.3475579291161995 + 0.3258472001609228im
 
 [:, :, 3] =
-   2.715452932950842 - 1.4643809287648921im  …   2.2952742401568123 - 1.1145324263893714im
-   4.571534061589246 - 0.8262447466399373im         4.8362815886544 - 2.344252517304121im
- -1.7383522932766926 + 1.0537488747996804im     -2.8387228872628087 + 2.207929119693701im
+   -0.660656050843288 + 0.8839469972125781im  …    1.9067921551382354 - 0.17434825203762272im
+  -2.4475543114048293 + 0.6144459311167487im     -0.23026096667989826 + 0.4883809703403459im
+ -0.40040642225250306 - 0.5761896261535611im       -5.184316292103701 + 1.6054902237811386im
 
 [:, :, 4] =
- -1.4212252973964756 - 0.23882668770053064im  …    -4.6664401484389755 + 1.603328792114152im
- -3.4518566115590366 + 0.41559248880586497im     -0.056560595808900396 + 0.02338424611291481im
-  1.3997784421139534 + 0.05076830829886059im       -2.4126463637909734 + 1.7731076678885356im
+   -0.2787669670614672 - 0.6725043239406752im   …  -4.014890756672018 + 1.2267301488241102im
+ -0.015146715897215501 - 0.21874296888079614im     2.3066336097889595 - 1.5151128734411805im
+   -0.6963990584477671 - 0.2839326936057931im      6.1063449375398005 - 1.8789912756313178im
 
 julia&gt; scalarBA = dot(B,A)
--3.543574991241054 - 2.9837554139955786im
+3.1543653449117643 - 4.462147207226295im
 
 julia&gt; scalarAA = dot(A,A)
-19.382814928010774 + 0.0im
+24.846675204808754 + 0.0im
 
 julia&gt; normA² = norm(A)^2
-19.38281492801077
+24.846675204808754
 
 julia&gt; U,S,Vd = tsvd(A,(1,3),(2,));
 
@@ -467,20 +467,20 @@ julia&gt; (ℂ^3)&#39; == ℂ^3
 false
 
 julia&gt; @tensor d = conj(A[a,b,c])*A[a,b,c]
-19.382814928010767 + 0.0im
+24.846675204808754 + 0.0im
 
 julia&gt; d ≈ normA²
 true</code></pre><p>This might seem overly strict or puristic, but we believe that it can help to catch errors, e.g. unintended contractions. In particular, contracting two indices both living in <code>ℂ^n</code> would represent an operation that is not invariant under arbitrary unitary basis changes.</p><p>It also makes clear the isomorphism between linear maps <code>ℂ^n → ℂ^m</code> and tensors in <code>ℂ^m ⊗ (ℂ^n)&#39;</code>:</p><pre><code class="language-julia-repl">julia&gt; m = TensorMap(randn, ComplexF64, ℂ^3, ℂ^4)
 TensorMap(ProductSpace(ℂ^3) ← ProductSpace(ℂ^4)):
-  1.5294723224832603 + 0.39641370201322207im  …   -0.4811879019723311 - 0.410253205614319im
- -0.7882866769400948 + 0.7337090233204125im       0.08532084772666311 - 0.5832576925708335im
- 0.03605235363368007 + 0.416607473537114im       0.017764228778688565 + 0.6255856169791476im
+   0.6962239194687968 - 0.4861419447963045im  …   0.1520783112740649 - 1.1687354973551087im
+ -0.42897629781216245 + 0.6669204850760774im      0.0698917061419811 + 0.14429878310769687im
+    0.735536398515627 + 0.4888686369629775im     -0.6672760489647814 + 1.2920112218821849im
 
 julia&gt; m2 = permute(m, (1,2), ())
 TensorMap((ℂ^3 ⊗ (ℂ^4)&#39;) ← ProductSpace{ComplexSpace, 0}()):
-  1.5294723224832603 + 0.39641370201322207im  …   -0.4811879019723311 - 0.410253205614319im
- -0.7882866769400948 + 0.7337090233204125im       0.08532084772666311 - 0.5832576925708335im
- 0.03605235363368007 + 0.416607473537114im       0.017764228778688565 + 0.6255856169791476im
+   0.6962239194687968 - 0.4861419447963045im  …   0.1520783112740649 - 1.1687354973551087im
+ -0.42897629781216245 + 0.6669204850760774im      0.0698917061419811 + 0.14429878310769687im
+    0.735536398515627 + 0.4888686369629775im     -0.6672760489647814 + 1.2920112218821849im
 
 julia&gt; codomain(m2)
 (ℂ^3 ⊗ (ℂ^4)&#39;)
@@ -505,60 +505,60 @@ julia&gt; A = Tensor(randn, V1*V1*V2&#39;)
 TensorMap((ℤ₂Space(0=&gt;3, 1=&gt;2) ⊗ ℤ₂Space(0=&gt;3, 1=&gt;2) ⊗ ℤ₂Space(0=&gt;1, 1=&gt;1)&#39;) ← ProductSpace{ℤ₂Space, 0}()):
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](1), Irrep[ℤ₂](0)) ← ():
 [:, :, 1] =
-  0.16030972396782953   0.19988745638986877
- -0.6468074687249685   -0.3658487153199715
+ -1.1110439987718495  -0.40597537724491334
+ -0.9758298794522047   0.4944281214614596
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](1), Irrep[ℤ₂](1)) ← ():
 [:, :, 1] =
-  0.4478936937764018  -3.2482316852161963
- -1.3705004012533977  -1.5955153511922382
- -0.8338766526616107  -0.9536072776983219
+ -0.766385982114405   -0.424590974390971
+  0.2403244327168424   0.12835795206384146
+  0.9282384242795507  -0.03326376405089014
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](0), Irrep[ℤ₂](0)) ← ():
 [:, :, 1] =
- -0.0816028854108215  0.7641845738542445   0.6731081901471286
-  0.9451534107498092  2.0929641117982887   1.9570752108797698
-  0.433021538092313   0.17243370004949415  1.46061997174913
+  0.7328711122105512    0.6930686055216163   0.4176615797908899
+  0.35521995766032444  -1.324954100756089    1.1076824634503388
+ -0.5583401538965405    1.4528297513259332  -1.036598077184005
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](0), Irrep[ℤ₂](1)) ← ():
 [:, :, 1] =
- 0.30012555074258074  -1.980625498864242     2.2069547090732464
- 0.718920812544332    -0.47603946163302563  -1.0684630934286385
+ 1.2801716424771077   0.4998264461674939  0.42772498385441127
+ 0.562190555766288   -1.9091604584122224  0.057436321536170724
 
 julia&gt; convert(Array, A)
 5×5×2 Array{Float64,3}:
 [:, :, 1] =
- -0.0816029  0.764185  0.673108   0.0        0.0
-  0.945153   2.09296   1.95708    0.0        0.0
-  0.433022   0.172434  1.46062    0.0        0.0
-  0.0        0.0       0.0        0.16031    0.199887
-  0.0        0.0       0.0       -0.646807  -0.365849
+  0.732871   0.693069   0.417662   0.0       0.0
+  0.35522   -1.32495    1.10768    0.0       0.0
+ -0.55834    1.45283   -1.0366     0.0       0.0
+  0.0        0.0        0.0       -1.11104  -0.405975
+  0.0        0.0        0.0       -0.97583   0.494428
 
 [:, :, 2] =
- 0.0        0.0        0.0       0.447894  -3.24823
- 0.0        0.0        0.0      -1.3705    -1.59552
- 0.0        0.0        0.0      -0.833877  -0.953607
- 0.300126  -1.98063    2.20695   0.0        0.0
- 0.718921  -0.476039  -1.06846   0.0        0.0</code></pre><p>Here, we create a space 5-dimensional space <code>V1</code>, which has a three-dimensional subspace associated with charge 0 (the trivial irrep of <span>$ℤ₂$</span>) and a two-dimensional subspace with charge 1 (the non-trivial irrep). Similar for <code>V2</code>, where both subspaces are one- dimensional. Representing the tensor as a dense <code>Array</code>, we see that it is zero in those regions where the charges don&#39;t add to zero (modulo 2). Of course, the <code>Tensor(Map)</code> type in TensorKit.jl won&#39;t store these zero blocks, and only stores the non-zero information, which we can recognize also in the full <code>Array</code> representation.</p><p>From there on, the resulting tensors support all of the same operations as the ones we encountered in the previous examples.</p><pre><code class="language-julia-repl">julia&gt; B = Tensor(randn, V1&#39;*V1*V2);
+ 0.0        0.0       0.0        -0.766386  -0.424591
+ 0.0        0.0       0.0         0.240324   0.128358
+ 0.0        0.0       0.0         0.928238  -0.0332638
+ 1.28017    0.499826  0.427725    0.0        0.0
+ 0.562191  -1.90916   0.0574363   0.0        0.0</code></pre><p>Here, we create a space 5-dimensional space <code>V1</code>, which has a three-dimensional subspace associated with charge 0 (the trivial irrep of <span>$ℤ₂$</span>) and a two-dimensional subspace with charge 1 (the non-trivial irrep). Similar for <code>V2</code>, where both subspaces are one- dimensional. Representing the tensor as a dense <code>Array</code>, we see that it is zero in those regions where the charges don&#39;t add to zero (modulo 2). Of course, the <code>Tensor(Map)</code> type in TensorKit.jl won&#39;t store these zero blocks, and only stores the non-zero information, which we can recognize also in the full <code>Array</code> representation.</p><p>From there on, the resulting tensors support all of the same operations as the ones we encountered in the previous examples.</p><pre><code class="language-julia-repl">julia&gt; B = Tensor(randn, V1&#39;*V1*V2);
 
 julia&gt; @tensor C[a,b] := A[a,c,d]*B[c,b,d]
 TensorMap((ℤ₂Space(0=&gt;3, 1=&gt;2) ⊗ ℤ₂Space(0=&gt;3, 1=&gt;2)) ← ProductSpace{ℤ₂Space, 0}()):
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](1)) ← ():
-  3.853606666001798    4.519030650867728
- -0.8365836408265763  -0.33623674235776
+ -1.9054223024705967  -0.7630925822641617
+ -1.7259683530392367  -3.747573817952305
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](0)) ← ():
- 5.393025462921024   0.12162906526109604   2.5661880850695176
- 2.4126485610613395  1.7348638018960545   -0.9673790730337802
- 0.4946426803685289  0.895930637135307    -1.7721702764981055
+ -0.5020279573828065   0.7710802383769775   -1.0002787159184285
+  0.7023116562517472  -0.14455551610568101   0.3956495237523708
+ -1.8567403453787445   1.8259209402942127   -0.7236598327740663
 
 julia&gt; U,S,V = tsvd(A,(1,3),(2,));
 
 julia&gt; U&#39;*U # should be the identity on the corresponding domain = codomain
 TensorMap(ProductSpace(ℤ₂Space(0=&gt;3, 1=&gt;2)&#39;) ← ProductSpace(ℤ₂Space(0=&gt;3, 1=&gt;2)&#39;)):
 * Data for sector (Irrep[ℤ₂](0),) ← (Irrep[ℤ₂](0),):
-  0.9999999999999993      -3.135900279349003e-16   2.3462499609288873e-16
- -3.135900279349003e-16    1.0                     1.5146621460987701e-16
-  2.3462499609288873e-16   1.5146621460987701e-16  0.9999999999999991
+ 1.0000000000000002     1.531368691346706e-16  6.755829846809234e-17
+ 1.531368691346706e-16  1.0000000000000004     1.131470622233616e-17
+ 6.755829846809234e-17  1.131470622233616e-17  0.9999999999999999
 * Data for sector (Irrep[ℤ₂](1),) ← (Irrep[ℤ₂](1),):
- 0.9999999999999999     6.430338476849665e-17
- 6.430338476849665e-17  1.0
+  1.0000000000000004     -6.222536802580237e-17
+ -6.222536802580237e-17   1.0000000000000007
 
 julia&gt; U&#39;*U ≈ one(U&#39;*U)
 true
@@ -567,94 +567,94 @@ julia&gt; P = U*U&#39; # should be a projector
 TensorMap((ℤ₂Space(0=&gt;3, 1=&gt;2) ⊗ ℤ₂Space(0=&gt;1, 1=&gt;1)&#39;) ← (ℤ₂Space(0=&gt;3, 1=&gt;2) ⊗ ℤ₂Space(0=&gt;1, 1=&gt;1)&#39;)):
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](0)) ← (Irrep[ℤ₂](0), Irrep[ℤ₂](0)):
 [:, :, 1, 1] =
- 0.15640585131509416
- 0.16544452705256368
- 0.04719602650206995
+  0.34386200394308136
+  0.04393029326921054
+ -0.05211798258830887
 
 [:, :, 2, 1] =
- 0.16544452705256368
- 0.8536024775899737
- 0.29361303526684623
+  0.04393029326921054
+  0.5696466756497883
+ -0.48058387495032256
 
 [:, :, 3, 1] =
- 0.04719602650206995
- 0.29361303526684623
- 0.19236573394453493
+ -0.05211798258830887
+ -0.48058387495032256
+  0.4476141373093205
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](1)) ← (Irrep[ℤ₂](0), Irrep[ℤ₂](0)):
 [:, :, 1, 1] =
- -0.07160732200729306
- -0.31179495822608794
+  0.4270180690709288
+ -0.1965460253947435
 
 [:, :, 2, 1] =
- -0.08177796980359428
-  0.06853572416468146
+ -0.08331876776568481
+ -0.07291496403314587
 
 [:, :, 3, 1] =
-  0.25868955029531565
- -0.002189867650841856
+ -0.028065329304029604
+ -0.11309692175239416
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](0)) ← (Irrep[ℤ₂](1), Irrep[ℤ₂](1)):
 [:, :, 1, 1] =
- -0.07160732200729306
- -0.08177796980359428
-  0.25868955029531565
+  0.4270180690709288
+ -0.08331876776568481
+ -0.028065329304029604
 
 [:, :, 2, 1] =
- -0.31179495822608794
-  0.06853572416468146
- -0.002189867650841856
+ -0.1965460253947435
+ -0.07291496403314587
+ -0.11309692175239416
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](1)) ← (Irrep[ℤ₂](1), Irrep[ℤ₂](1)):
 [:, :, 1, 1] =
-  0.9133451619006118
- -0.02025459925821157
+ 0.7150865589335117
+ 0.1168916638693324
 
 [:, :, 2, 1] =
- -0.02025459925821157
-  0.884280775249784
+ 0.1168916638693324
+ 0.9237906241642986
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](0)) ← (Irrep[ℤ₂](1), Irrep[ℤ₂](0)):
 [:, :, 1, 1] =
-  0.008910954425023992
- -0.032260394612065875
+  0.5069676960009594
+ -0.017664877804781157
 
 [:, :, 2, 1] =
- -0.032260394612065875
-  0.12999635650293365
+ -0.017664877804781157
+  0.8185012647476336
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](1)) ← (Irrep[ℤ₂](1), Irrep[ℤ₂](0)):
 [:, :, 1, 1] =
- -0.007006689439477427
- -0.07523058247364295
- -0.04562983694369343
+  0.42833666938283027
+ -0.13171494647305773
+ -0.22094857737085363
 
 [:, :, 2, 1] =
- -0.08870059764155734
-  0.27575399018389135
-  0.16777518175839506
+ -0.1538543636788001
+  0.04355546452002892
+ -0.35025227013359433
 * Data for sector (Irrep[ℤ₂](1), Irrep[ℤ₂](0)) ← (Irrep[ℤ₂](0), Irrep[ℤ₂](1)):
 [:, :, 1, 1] =
- -0.007006689439477427
- -0.08870059764155734
+  0.42833666938283027
+ -0.1538543636788001
 
 [:, :, 2, 1] =
- -0.07523058247364295
-  0.27575399018389135
+ -0.13171494647305773
+  0.04355546452002892
 
 [:, :, 3, 1] =
- -0.04562983694369343
-  0.16777518175839506
+ -0.22094857737085363
+ -0.35025227013359433
 * Data for sector (Irrep[ℤ₂](0), Irrep[ℤ₂](1)) ← (Irrep[ℤ₂](0), Irrep[ℤ₂](1)):
 [:, :, 1, 1] =
- 0.9909274559425597
- 0.029814686416345635
- 0.013580418137537232
+  0.3855004531752359
+ -0.11790478410373359
+ -0.1258763206540106
 
 [:, :, 2, 1] =
- 0.029814686416345635
- 0.6360064485820841
- 0.3858930250423329
+ -0.11790478410373359
+  0.036077202784777614
+  0.04035089212768012
 
 [:, :, 3, 1] =
- 0.013580418137537232
- 0.3858930250423329
- 0.2341587845473985
+ -0.1258763206540106
+  0.04035089212768012
+  0.2529533832913944
 
 julia&gt; P*P ≈ P
 true</code></pre><p>We also support other abelian symmetries, e.g.</p><pre><code class="language-julia-repl">julia&gt; V = U₁Space(0=&gt;2,1=&gt;1,-1=&gt;1)
@@ -667,38 +667,38 @@ julia&gt; A = TensorMap(randn, V*V, V)
 TensorMap((U₁Space(0=&gt;2, 1=&gt;1, -1=&gt;1) ⊗ U₁Space(0=&gt;2, 1=&gt;1, -1=&gt;1)) ← ProductSpace(U₁Space(0=&gt;2, 1=&gt;1, -1=&gt;1))):
 * Data for sector (Irrep[U₁](1), Irrep[U₁](-1)) ← (Irrep[U₁](0),):
 [:, :, 1] =
- -0.9518237828639925
+ -0.6542276717257646
 
 [:, :, 2] =
- 0.20096291084638238
+ -1.2793633348548255
 * Data for sector (Irrep[U₁](-1), Irrep[U₁](1)) ← (Irrep[U₁](0),):
 [:, :, 1] =
- -0.13921545099365176
+ 0.11786687903957493
 
 [:, :, 2] =
- 0.3010113586093891
+ -1.662691508359187
 * Data for sector (Irrep[U₁](0), Irrep[U₁](0)) ← (Irrep[U₁](0),):
 [:, :, 1] =
-  0.4722679091725656  -1.0991985224105356
- -0.888055185230624    1.5353294308172836
+ -0.5587188605047003  -1.041640686971171
+ -1.8157249341668693   0.433195513354039
 
 [:, :, 2] =
-  0.7321033723246743  -0.04110953511518444
- -1.4829764721891463   1.182251795771155
+ -1.2019741841519658  -0.15877868316101074
+ -0.4019146504584103  -1.1180838042342207
 * Data for sector (Irrep[U₁](1), Irrep[U₁](0)) ← (Irrep[U₁](1),):
 [:, :, 1] =
- -0.421062720426681  -0.9291329538813342
+ 0.5685897238810904  -0.5991596870443956
 * Data for sector (Irrep[U₁](0), Irrep[U₁](1)) ← (Irrep[U₁](1),):
 [:, :, 1] =
- 0.1999112778213143
- 0.36281193541565204
+ -1.9358376426581376
+ -1.4240172810274039
 * Data for sector (Irrep[U₁](-1), Irrep[U₁](0)) ← (Irrep[U₁](-1),):
 [:, :, 1] =
- -1.1059605974512523  -0.09209440410511288
+ 0.5907074431919267  -0.19255790032425357
 * Data for sector (Irrep[U₁](0), Irrep[U₁](-1)) ← (Irrep[U₁](-1),):
 [:, :, 1] =
- -1.7014342877944661
-  0.2827571171151453
+ -0.8895890394495669
+ -2.052859996580376
 
 julia&gt; dim(A)
 20
@@ -706,28 +706,28 @@ julia&gt; dim(A)
 julia&gt; convert(Array, A)
 4×4×4 Array{Float64,3}:
 [:, :, 1] =
-  0.472268  -1.0992    0.0        0.0
- -0.888055   1.53533   0.0        0.0
-  0.0        0.0       0.0       -0.951824
-  0.0        0.0      -0.139215   0.0
+ -0.558719  -1.04164   0.0        0.0
+ -1.81572    0.433196  0.0        0.0
+  0.0        0.0       0.0       -0.654228
+  0.0        0.0       0.117867   0.0
 
 [:, :, 2] =
-  0.732103  -0.0411095  0.0       0.0
- -1.48298    1.18225    0.0       0.0
-  0.0        0.0        0.0       0.200963
-  0.0        0.0        0.301011  0.0
+ -1.20197   -0.158779   0.0       0.0
+ -0.401915  -1.11808    0.0       0.0
+  0.0        0.0        0.0      -1.27936
+  0.0        0.0       -1.66269   0.0
 
 [:, :, 3] =
-  0.0        0.0       0.199911  0.0
-  0.0        0.0       0.362812  0.0
- -0.421063  -0.929133  0.0       0.0
-  0.0        0.0       0.0       0.0
+ 0.0       0.0      -1.93584  0.0
+ 0.0       0.0      -1.42402  0.0
+ 0.56859  -0.59916   0.0      0.0
+ 0.0       0.0       0.0      0.0
 
 [:, :, 4] =
-  0.0       0.0        0.0  -1.70143
-  0.0       0.0        0.0   0.282757
-  0.0       0.0        0.0   0.0
- -1.10596  -0.0920944  0.0   0.0
+ 0.0        0.0       0.0  -0.889589
+ 0.0        0.0       0.0  -2.05286
+ 0.0        0.0       0.0   0.0
+ 0.590707  -0.192558  0.0   0.0
 
 julia&gt; V = GradedSpace[Irrep[U₁×ℤ₂]]((0,0)=&gt;2,(1,1)=&gt;1,(-1,0)=&gt;1)
 GradedSpace[(Irrep[U₁] ⊠ Irrep[ℤ₂])]((0, 0)=&gt;2, (-1, 0)=&gt;1, (1, 1)=&gt;1)
@@ -739,26 +739,26 @@ julia&gt; A = TensorMap(randn, V*V, V)
 TensorMap((GradedSpace[(Irrep[U₁] ⊠ Irrep[ℤ₂])]((0, 0)=&gt;2, (-1, 0)=&gt;1, (1, 1)=&gt;1) ⊗ GradedSpace[(Irrep[U₁] ⊠ Irrep[ℤ₂])]((0, 0)=&gt;2, (-1, 0)=&gt;1, (1, 1)=&gt;1)) ← ProductSpace(GradedSpace[(Irrep[U₁] ⊠ Irrep[ℤ₂])]((0, 0)=&gt;2, (-1, 0)=&gt;1, (1, 1)=&gt;1))):
 * Data for sector ((Irrep[U₁](0) ⊠ Irrep[ℤ₂](0)), (Irrep[U₁](0) ⊠ Irrep[ℤ₂](0))) ← ((Irrep[U₁](0) ⊠ Irrep[ℤ₂](0)),):
 [:, :, 1] =
- -0.5856408766188745  1.0547951510458657
-  0.8387798219659954  0.27556373610116636
+ 0.9787623321503837  -0.9067642299083439
+ 0.9781363791121046  -1.4342223387799506
 
 [:, :, 2] =
- 1.7602702888577373   0.4584544749874101
- 0.6935350348881525  -0.12409184564490311
+ -0.26562195253932974  0.11097305784981552
+ -1.6224404171504128   1.5492568781703695
 * Data for sector ((Irrep[U₁](-1) ⊠ Irrep[ℤ₂](0)), (Irrep[U₁](0) ⊠ Irrep[ℤ₂](0))) ← ((Irrep[U₁](-1) ⊠ Irrep[ℤ₂](0)),):
 [:, :, 1] =
- 0.7414508074779469  -0.26570301360785037
+ 1.5424979507925969  -0.9732327138462107
 * Data for sector ((Irrep[U₁](0) ⊠ Irrep[ℤ₂](0)), (Irrep[U₁](-1) ⊠ Irrep[ℤ₂](0))) ← ((Irrep[U₁](-1) ⊠ Irrep[ℤ₂](0)),):
 [:, :, 1] =
- -0.025545363031824954
-  0.07918551300946795
+ -0.056933204301166704
+ -0.1961584149164371
 * Data for sector ((Irrep[U₁](1) ⊠ Irrep[ℤ₂](1)), (Irrep[U₁](0) ⊠ Irrep[ℤ₂](0))) ← ((Irrep[U₁](1) ⊠ Irrep[ℤ₂](1)),):
 [:, :, 1] =
- 1.2938641018088872  -1.3530156279740764
+ -0.17559592947889227  0.33597161202976106
 * Data for sector ((Irrep[U₁](0) ⊠ Irrep[ℤ₂](0)), (Irrep[U₁](1) ⊠ Irrep[ℤ₂](1))) ← ((Irrep[U₁](1) ⊠ Irrep[ℤ₂](1)),):
 [:, :, 1] =
- -0.6798400660905485
- -0.5398982847041901
+  0.37793675724661335
+ -0.706929742353891
 
 julia&gt; dim(A)
 16
@@ -766,28 +766,28 @@ julia&gt; dim(A)
 julia&gt; convert(Array, A)
 4×4×4 Array{Float64,3}:
 [:, :, 1] =
- -0.585641  1.0548    0.0  0.0
-  0.83878   0.275564  0.0  0.0
-  0.0       0.0       0.0  0.0
-  0.0       0.0       0.0  0.0
+ 0.978762  -0.906764  0.0  0.0
+ 0.978136  -1.43422   0.0  0.0
+ 0.0        0.0       0.0  0.0
+ 0.0        0.0       0.0  0.0
 
 [:, :, 2] =
- 1.76027    0.458454  0.0  0.0
- 0.693535  -0.124092  0.0  0.0
- 0.0        0.0       0.0  0.0
- 0.0        0.0       0.0  0.0
+ -0.265622  0.110973  0.0  0.0
+ -1.62244   1.54926   0.0  0.0
+  0.0       0.0       0.0  0.0
+  0.0       0.0       0.0  0.0
 
 [:, :, 3] =
- 0.0        0.0       -0.0255454  0.0
- 0.0        0.0        0.0791855  0.0
- 0.741451  -0.265703   0.0        0.0
- 0.0        0.0        0.0        0.0
+ 0.0      0.0       -0.0569332  0.0
+ 0.0      0.0       -0.196158   0.0
+ 1.5425  -0.973233   0.0        0.0
+ 0.0      0.0        0.0        0.0
 
 [:, :, 4] =
- 0.0       0.0      0.0  -0.67984
- 0.0       0.0      0.0  -0.539898
- 0.0       0.0      0.0   0.0
- 1.29386  -1.35302  0.0   0.0</code></pre><p>Here, the <code>dim</code> of a <code>TensorMap</code> returns the number of linearly independent components, i.e. the number of non-zero entries in the case of an abelian symmetry. Also note that we can use <code>×</code> (obtained as <code>\times+TAB</code>) to combine different symmetries. The general space associated with symmetries is a <code>GradedSpace</code>. Although this is actually an abstract type, it is the access point for users to construct spaces with arbitrary symmetries, and <code>ℤ₂Space</code> (also <code>Z2Space</code> as non-Unicode alternative) and <code>U₁Space</code> (or <code>U1Space</code>) are just convenient synonyms, e.g.</p><pre><code class="language-julia-repl">julia&gt; GradedSpace[Irrep[U₁]](0=&gt;3,1=&gt;2,-1=&gt;1) == U1Space(-1=&gt;1,1=&gt;2,0=&gt;3)
+  0.0       0.0       0.0   0.377937
+  0.0       0.0       0.0  -0.70693
+  0.0       0.0       0.0   0.0
+ -0.175596  0.335972  0.0   0.0</code></pre><p>Here, the <code>dim</code> of a <code>TensorMap</code> returns the number of linearly independent components, i.e. the number of non-zero entries in the case of an abelian symmetry. Also note that we can use <code>×</code> (obtained as <code>\times+TAB</code>) to combine different symmetries. The general space associated with symmetries is a <code>GradedSpace</code>. Although this is actually an abstract type, it is the access point for users to construct spaces with arbitrary symmetries, and <code>ℤ₂Space</code> (also <code>Z2Space</code> as non-Unicode alternative) and <code>U₁Space</code> (or <code>U1Space</code>) are just convenient synonyms, e.g.</p><pre><code class="language-julia-repl">julia&gt; GradedSpace[Irrep[U₁]](0=&gt;3,1=&gt;2,-1=&gt;1) == U1Space(-1=&gt;1,1=&gt;2,0=&gt;3)
 true
 
 julia&gt; V = U₁Space(1=&gt;2,0=&gt;3,-1=&gt;1)
@@ -815,50 +815,50 @@ true</code></pre><p>Note that now <code>V</code> has a two-dimensional subspace 
 TensorMap((SU₂Space(0=&gt;2, 1/2=&gt;1, 1=&gt;1) ⊗ SU₂Space(0=&gt;2, 1/2=&gt;1, 1=&gt;1)) ← ProductSpace(SU₂Space(0=&gt;2, 1/2=&gt;1, 1=&gt;1))):
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1/2, 1/2), 0, (false, false), ()) ← FusionTree{Irrep[SU₂]}((0,), 0, (false,), ()):
 [:, :, 1] =
- 0.1992301523066383
+ 0.28652726809128637
 
 [:, :, 2] =
- -1.3725542606600585
+ 0.911197845288914
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1, 1), 0, (false, false), ()) ← FusionTree{Irrep[SU₂]}((0,), 0, (false,), ()):
 [:, :, 1] =
- -0.031194063303142408
+ -0.9125417175076602
 
 [:, :, 2] =
- 1.2143585068793092
+ -1.5226153176557695
 * Data for fusiontree FusionTree{Irrep[SU₂]}((0, 0), 0, (false, false), ()) ← FusionTree{Irrep[SU₂]}((0,), 0, (false,), ()):
 [:, :, 1] =
- 0.5218784500498087  1.2538712545511994
- 1.8147570543290574  0.23456445927350775
+ 0.6143235751191785   0.27005681990662983
+ 1.3588384763051693  -1.1993031571531567
 
 [:, :, 2] =
- 0.746058919865319   -0.842164030669296
- 0.8385960551094512   0.06378023036783854
+ -0.40929649803978335   0.06907043389180342
+  0.7638522966056965   -1.1340673361833582
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1/2, 0), 1/2, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1/2,), 1/2, (false,), ()):
 [:, :, 1] =
- 0.28730375346463594  -1.206053405107463
+ 0.011706559435190242  -0.4995826168072896
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1/2, 1), 1/2, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1/2,), 1/2, (false,), ()):
 [:, :, 1] =
- 1.1082859820687356
+ 0.4908256853400813
 * Data for fusiontree FusionTree{Irrep[SU₂]}((0, 1/2), 1/2, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1/2,), 1/2, (false,), ()):
 [:, :, 1] =
- -1.2228972087533152
-  0.40136136085344837
+ -0.5732618869621666
+  0.6856025701454248
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1, 1/2), 1/2, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1/2,), 1/2, (false,), ()):
 [:, :, 1] =
- -0.2259444875923397
+ 1.0232453912398367
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1, 0), 1, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1,), 1, (false,), ()):
 [:, :, 1] =
- -0.9505254062822842  0.13100517590274455
+ 2.2390425016479574  -0.8700044259680217
 * Data for fusiontree FusionTree{Irrep[SU₂]}((0, 1), 1, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1,), 1, (false,), ()):
 [:, :, 1] =
- -0.8506139584834943
- -0.7610483714198522
+ -3.2763521154343427
+  0.5537007588184057
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1, 1), 1, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1,), 1, (false,), ()):
 [:, :, 1] =
- 0.6574456411494677
+ 0.10248200607885534
 * Data for fusiontree FusionTree{Irrep[SU₂]}((1/2, 1/2), 1, (false, false), ()) ← FusionTree{Irrep[SU₂]}((1,), 1, (false,), ()):
 [:, :, 1] =
- -0.18399631027149804
+ 0.9413045972982359
 
 julia&gt; dim(A)
 24
@@ -866,67 +866,67 @@ julia&gt; dim(A)
 julia&gt; convert(Array, A)
 7×7×7 Array{Float64,3}:
 [:, :, 1] =
- 0.521878  1.25387    0.0       0.0        0.0        0.0         0.0
- 1.81476   0.234564   0.0       0.0        0.0        0.0         0.0
- 0.0       0.0        0.0       0.140877   0.0        0.0         0.0
- 0.0       0.0       -0.140877  0.0        0.0        0.0         0.0
- 0.0       0.0        0.0       0.0        0.0        0.0        -0.0180099
- 0.0       0.0        0.0       0.0        0.0        0.0180099   0.0
- 0.0       0.0        0.0       0.0       -0.0180099  0.0         0.0
+ 0.614324   0.270057   0.0       0.0        0.0       0.0        0.0
+ 1.35884   -1.1993     0.0       0.0        0.0       0.0        0.0
+ 0.0        0.0        0.0       0.202605   0.0       0.0        0.0
+ 0.0        0.0       -0.202605  0.0        0.0       0.0        0.0
+ 0.0        0.0        0.0       0.0        0.0       0.0       -0.526856
+ 0.0        0.0        0.0       0.0        0.0       0.526856   0.0
+ 0.0        0.0        0.0       0.0       -0.526856  0.0        0.0
 
 [:, :, 2] =
- 0.746059  -0.842164   0.0        0.0       0.0       0.0      0.0
- 0.838596   0.0637802  0.0        0.0       0.0       0.0      0.0
- 0.0        0.0        0.0       -0.970542  0.0       0.0      0.0
- 0.0        0.0        0.970542   0.0       0.0       0.0      0.0
- 0.0        0.0        0.0        0.0       0.0       0.0      0.70111
- 0.0        0.0        0.0        0.0       0.0      -0.70111  0.0
- 0.0        0.0        0.0        0.0       0.70111   0.0      0.0
+ -0.409296   0.0690704   0.0       0.0        0.0       0.0        0.0
+  0.763852  -1.13407     0.0       0.0        0.0       0.0        0.0
+  0.0        0.0         0.0       0.644314   0.0       0.0        0.0
+  0.0        0.0        -0.644314  0.0        0.0       0.0        0.0
+  0.0        0.0         0.0       0.0        0.0       0.0       -0.879082
+  0.0        0.0         0.0       0.0        0.0       0.879082   0.0
+  0.0        0.0         0.0       0.0       -0.879082  0.0        0.0
 
 [:, :, 3] =
- 0.0        0.0      -1.2229     0.0        0.0       0.0       0.0
- 0.0        0.0       0.401361   0.0        0.0       0.0       0.0
- 0.287304  -1.20605   0.0        0.0        0.0       0.639869  0.0
- 0.0        0.0       0.0        0.0       -0.904912  0.0       0.0
- 0.0        0.0       0.0       -0.184483   0.0       0.0       0.0
- 0.0        0.0       0.130449   0.0        0.0       0.0       0.0
- 0.0        0.0       0.0        0.0        0.0       0.0       0.0
+ 0.0         0.0       -0.573262  0.0        0.0       0.0       0.0
+ 0.0         0.0        0.685603  0.0        0.0       0.0       0.0
+ 0.0117066  -0.499583   0.0       0.0        0.0       0.283378  0.0
+ 0.0         0.0        0.0       0.0       -0.400757  0.0       0.0
+ 0.0         0.0        0.0       0.835476   0.0       0.0       0.0
+ 0.0         0.0       -0.590771  0.0        0.0       0.0       0.0
+ 0.0         0.0        0.0       0.0        0.0       0.0       0.0
 
 [:, :, 4] =
- 0.0        0.0      0.0       -1.2229    0.0   0.0       0.0
- 0.0        0.0      0.0        0.401361  0.0   0.0       0.0
- 0.0        0.0      0.0        0.0       0.0   0.0       0.904912
- 0.287304  -1.20605  0.0        0.0       0.0  -0.639869  0.0
- 0.0        0.0      0.0        0.0       0.0   0.0       0.0
- 0.0        0.0      0.0       -0.130449  0.0   0.0       0.0
- 0.0        0.0      0.184483   0.0       0.0   0.0       0.0
+ 0.0         0.0        0.0       -0.573262  0.0   0.0       0.0
+ 0.0         0.0        0.0        0.685603  0.0   0.0       0.0
+ 0.0         0.0        0.0        0.0       0.0   0.0       0.400757
+ 0.0117066  -0.499583   0.0        0.0       0.0  -0.283378  0.0
+ 0.0         0.0        0.0        0.0       0.0   0.0       0.0
+ 0.0         0.0        0.0        0.590771  0.0   0.0       0.0
+ 0.0         0.0       -0.835476   0.0       0.0   0.0       0.0
 
 [:, :, 5] =
-  0.0       0.0        0.0       0.0  -0.850614  0.0       0.0
-  0.0       0.0        0.0       0.0  -0.761048  0.0       0.0
-  0.0       0.0       -0.183996  0.0   0.0       0.0       0.0
-  0.0       0.0        0.0       0.0   0.0       0.0       0.0
- -0.950525  0.131005   0.0       0.0   0.0       0.464884  0.0
-  0.0       0.0        0.0       0.0  -0.464884  0.0       0.0
-  0.0       0.0        0.0       0.0   0.0       0.0       0.0
+ 0.0       0.0       0.0       0.0  -3.27635    0.0        0.0
+ 0.0       0.0       0.0       0.0   0.553701   0.0        0.0
+ 0.0       0.0       0.941305  0.0   0.0        0.0        0.0
+ 0.0       0.0       0.0       0.0   0.0        0.0        0.0
+ 2.23904  -0.870004  0.0       0.0   0.0        0.0724657  0.0
+ 0.0       0.0       0.0       0.0  -0.0724657  0.0        0.0
+ 0.0       0.0       0.0       0.0   0.0        0.0        0.0
 
 [:, :, 6] =
-  0.0       0.0        0.0        0.0        0.0       -0.850614  0.0
-  0.0       0.0        0.0        0.0        0.0       -0.761048  0.0
-  0.0       0.0        0.0       -0.130105   0.0        0.0       0.0
-  0.0       0.0       -0.130105   0.0        0.0        0.0       0.0
-  0.0       0.0        0.0        0.0        0.0        0.0       0.464884
- -0.950525  0.131005   0.0        0.0        0.0        0.0       0.0
-  0.0       0.0        0.0        0.0       -0.464884   0.0       0.0
+ 0.0       0.0       0.0       0.0        0.0        -3.27635   0.0
+ 0.0       0.0       0.0       0.0        0.0         0.553701  0.0
+ 0.0       0.0       0.0       0.665603   0.0         0.0       0.0
+ 0.0       0.0       0.665603  0.0        0.0         0.0       0.0
+ 0.0       0.0       0.0       0.0        0.0         0.0       0.0724657
+ 2.23904  -0.870004  0.0       0.0        0.0         0.0       0.0
+ 0.0       0.0       0.0       0.0       -0.0724657   0.0       0.0
 
 [:, :, 7] =
-  0.0       0.0       0.0   0.0       0.0   0.0       -0.850614
-  0.0       0.0       0.0   0.0       0.0   0.0       -0.761048
-  0.0       0.0       0.0   0.0       0.0   0.0        0.0
-  0.0       0.0       0.0  -0.183996  0.0   0.0        0.0
-  0.0       0.0       0.0   0.0       0.0   0.0        0.0
-  0.0       0.0       0.0   0.0       0.0   0.0        0.464884
- -0.950525  0.131005  0.0   0.0       0.0  -0.464884   0.0
+ 0.0       0.0       0.0  0.0       0.0   0.0        -3.27635
+ 0.0       0.0       0.0  0.0       0.0   0.0         0.553701
+ 0.0       0.0       0.0  0.0       0.0   0.0         0.0
+ 0.0       0.0       0.0  0.941305  0.0   0.0         0.0
+ 0.0       0.0       0.0  0.0       0.0   0.0         0.0
+ 0.0       0.0       0.0  0.0       0.0   0.0         0.0724657
+ 2.23904  -0.870004  0.0  0.0       0.0  -0.0724657   0.0
 
 julia&gt; norm(A) ≈ norm(convert(Array, A))
-true</code></pre><p>In this case, the full <code>Array</code> representation of the tensor has again many zeros, but it is less obvious to recognize the dense blocks, as there are additional zeros and the numbers in the original tensor data do not match with those in the <code>Array</code>. The reason is of course that the original tensor data now needs to be transformed with a construction known as fusion trees, which are made up out of the Clebsch-Gordan coefficients of the group. Indeed, note that the non-zero blocks are also no longer labeled by a list of sectors, but by pair of fusion trees. This will be explained further in the manual. However, the Clebsch-Gordan coefficients of the group are only needed to actually convert a tensor to an <code>Array</code>. For working with tensors with <code>SU₂Space</code> indices, e.g. contracting or factorizing them, the Clebsch-Gordan coefficients are never needed explicitly. Instead, recoupling relations are used to symbolically manipulate the basis of fusion trees, and this only requires what is known as the topological data of the group (or its representation theory).</p><p>In fact, this formalism extends beyond the case of group representations on vector spaces, and can also deal with super vector spaces (to describe fermions) and more general (unitary) fusion categories. Preliminary support for these generalizations is present in TensorKit.jl and will be extended in the near future.</p><p>All of these concepts will be explained throughout the remainder of this manual, including several details regarding their implementation. However, to just use tensors and their manipulations (contractions, factorizations, ...) in higher level algorithms (e.g. tensoer network algorithms), one does not need to know or understand most of these details, and one can immediately refer to the general interface of the <code>TensorMap</code> type, discussed on the <a href="../tensors/#s_tensors">last page</a>. Adhering to this interface should yield code and algorithms that are oblivious to the underlying symmetries and can thus work with arbitrary symmetric tensors.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../intro/">« Introduction</a><a class="docs-footer-nextpage" href="../categories/">Optional introduction to category theory »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 3 September 2020 15:25">Thursday 3 September 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+true</code></pre><p>In this case, the full <code>Array</code> representation of the tensor has again many zeros, but it is less obvious to recognize the dense blocks, as there are additional zeros and the numbers in the original tensor data do not match with those in the <code>Array</code>. The reason is of course that the original tensor data now needs to be transformed with a construction known as fusion trees, which are made up out of the Clebsch-Gordan coefficients of the group. Indeed, note that the non-zero blocks are also no longer labeled by a list of sectors, but by pair of fusion trees. This will be explained further in the manual. However, the Clebsch-Gordan coefficients of the group are only needed to actually convert a tensor to an <code>Array</code>. For working with tensors with <code>SU₂Space</code> indices, e.g. contracting or factorizing them, the Clebsch-Gordan coefficients are never needed explicitly. Instead, recoupling relations are used to symbolically manipulate the basis of fusion trees, and this only requires what is known as the topological data of the group (or its representation theory).</p><p>In fact, this formalism extends beyond the case of group representations on vector spaces, and can also deal with super vector spaces (to describe fermions) and more general (unitary) fusion categories. Preliminary support for these generalizations is present in TensorKit.jl and will be extended in the near future.</p><p>All of these concepts will be explained throughout the remainder of this manual, including several details regarding their implementation. However, to just use tensors and their manipulations (contractions, factorizations, ...) in higher level algorithms (e.g. tensoer network algorithms), one does not need to know or understand most of these details, and one can immediately refer to the general interface of the <code>TensorMap</code> type, discussed on the <a href="../tensors/#s_tensors">last page</a>. Adhering to this interface should yield code and algorithms that are oblivious to the underlying symmetries and can thus work with arbitrary symmetric tensors.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../intro/">« Introduction</a><a class="docs-footer-nextpage" href="../categories/">Optional introduction to category theory »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 9 September 2020 00:48">Wednesday 9 September 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
