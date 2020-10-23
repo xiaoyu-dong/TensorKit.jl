@@ -41,8 +41,8 @@ const ℤ₂ = ℤ{2}
 const ℤ₃ = ℤ{3}
 const ℤ₄ = ℤ{4}
 const SU₂ = SU{2}</code></pre><p>Groups themselves are abstract types without any functionality (at least for now). We also provide a number of convenient Unicode aliases. These group names are probably self- explanatory, except for <code>CU₁</code> which is explained below.</p><p>For all group irreps, the braiding style is bosonic</p><pre><code class="language-julia">abstract type AbstractIrrep{G&lt;:Group} &lt;: Sector end # irreps have integer quantum dimensions
-Base.@pure BraidingStyle(::Type{&lt;:AbstractIrrep}) = Bosonic()</code></pre><p>while we gather some more common functionality for irreps of abelian groups (which exhaust all possibilities of fusion categories with abelian fusion)</p><pre><code class="language-julia">const AbelianIrrep{G} = AbstractIrrep{G} where {G&lt;:AbelianGroup}
-Base.@pure FusionStyle(::Type{&lt;:AbelianIrrep}) = Abelian()
+BraidingStyle(::Type{&lt;:AbstractIrrep}) = Bosonic()</code></pre><p>while we gather some more common functionality for irreps of abelian groups (which exhaust all possibilities of fusion categories with abelian fusion)</p><pre><code class="language-julia">const AbelianIrrep{G} = AbstractIrrep{G} where {G&lt;:AbelianGroup}
+FusionStyle(::Type{&lt;:AbelianIrrep}) = Abelian()
 Base.isreal(::Type{&lt;:AbelianIrrep}) = true
 
 Nsymbol(a::I, b::I, c::I) where {I&lt;:AbelianIrrep} = c == first(a ⊗ b)
@@ -57,6 +57,8 @@ Rsymbol(a::I, b::I, c::I) where {I&lt;:AbelianIrrep} = Int(Nsymbol(a, b, c))</co
         new{N}(mod(n, N))
     end
 end
+Base.getindex(::IrrepTable, ::Type{ℤ{N}}) where N = ZNIrrep{N}
+Base.convert(Z::Type{&lt;:ZNIrrep}, n::Real) = Z(n)
 
 Base.one(::Type{ZNIrrep{N}}) where {N} =ZNIrrep{N}(0)
 Base.conj(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
@@ -71,6 +73,8 @@ Base.getindex(::SectorValues{ZNIrrep{N}}, i::Int) where N =
 findindex(::SectorValues{ZNIrrep{N}}, c::ZNIrrep{N}) where N = c.n + 1</code></pre><p>and <span>$\mathsf{U}_1$</span></p><pre><code class="language-julia">struct U1Irrep &lt;: AbstractIrrep{U₁}
     charge::HalfInt
 end
+Base.getindex(::IrrepTable, ::Type{U₁}) = U1Irrep
+Base.convert(::Type{U1Irrep}, c::Real) = U1Irrep(c)
 
 Base.one(::Type{U1Irrep}) = U1Irrep(0)
 Base.conj(c::U1Irrep) = U1Irrep(-c.charge)
@@ -84,7 +88,7 @@ function Base.getindex(::SectorValues{U1Irrep}, i::Int)
     i &lt; 1 &amp;&amp; throw(BoundsError(values(U1Irrep), i))
     return U1Irrep(iseven(i) ? half(i&gt;&gt;1) : -half(i&gt;&gt;1))
 end
-findindex(::SectorValues{U1Irrep}, c::U1Irrep) = (n = twice(c.charge); 2*abs(n)+(n&lt;=0))</code></pre><p>The <code>getindex</code> definition just below the type definition provides the mechanism to get the concrete type as <code>Irrep[G]</code> for a given group <code>G</code>. In the definition of <code>U1Irrep</code>, <code>HalfInt&lt;:Number</code> is a Julia type defined in <a href="https://github.com/sostock/HalfIntegers.jl">HalfIntegers.jl</a>, which is also used for <code>SU2Irrep</code> below, that stores integer or half integer numbers using twice their value. Strictly speaking, the linear representations of <code>U₁</code> can only have integer charges, and fractional charges lead to a projective representation. It can be useful to allow half integers in order to describe spin 1/2 systems with an axis rotation symmetry. As a user, you should not worry about the details of <code>HalfInt</code>, and additional methods for automatic conversion and pretty printing are provided, as illustrated by the following example</p><pre><code class="language-julia-repl">julia&gt; Irrep[U₁](0.5)
+findindex(::SectorValues{U1Irrep}, c::U1Irrep) = (n = twice(c.charge); 2*abs(n)+(n&lt;=0))</code></pre><p>The <code>getindex</code> definition just below the type definition provides the mechanism to get the concrete type as <code>Irrep[G]</code> for a given group <code>G</code>. Here, <code>IrrepTable</code> is the singleton type of which the constant <code>Irrep</code> is the only instance. The <code>Base.convert</code> definition allows to convert real numbers to the corresponding type of sector, and thus to omit the type information of the sector whenever this is clear from the context.</p><p>In the definition of <code>U1Irrep</code>, <code>HalfInt&lt;:Number</code> is a Julia type defined in <a href="https://github.com/sostock/HalfIntegers.jl">HalfIntegers.jl</a>, which is also used for <code>SU2Irrep</code> below, that stores integer or half integer numbers using twice their value. Strictly speaking, the linear representations of <code>U₁</code> can only have integer charges, and fractional charges lead to a projective representation. It can be useful to allow half integers in order to describe spin 1/2 systems with an axis rotation symmetry. As a user, you should not worry about the details of <code>HalfInt</code>, and additional methods for automatic conversion and pretty printing are provided, as illustrated by the following example</p><pre><code class="language-julia-repl">julia&gt; Irrep[U₁](0.5)
 Irrep[U₁](1/2)
 
 julia&gt; U1Irrep(0.4)
@@ -121,7 +125,7 @@ Base.one(::Type{SU2Irrep}) = SU2Irrep(zero(HalfInt))
 Base.conj(s::SU2Irrep) = s
 ⊗(s1::SU2Irrep, s2::SU2Irrep) = SectorSet{SU2Irrep}(abs(s1.j-s2.j):(s1.j+s2.j))
 dim(s::SU2Irrep) = twice(s.j)+1
-Base.@pure FusionStyle(::Type{SU2Irrep}) = SimpleNonAbelian()
+FusionStyle(::Type{SU2Irrep}) = SimpleNonAbelian()
 Base.isreal(::Type{SU2Irrep}) = true
 Nsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep) = WignerSymbols.δ(sa.j, sb.j, sc.j)
 Fsymbol(s1::SU2Irrep, s2::SU2Irrep, s3::SU2Irrep,
@@ -188,7 +192,7 @@ Base.one(::Type{CU1Irrep}) = CU1Irrep(zero(HalfInt), 0)
 Base.conj(c::CU1Irrep) = c
 dim(c::CU1Irrep) = ifelse(c.j == zero(HalfInt), 1, 2)
 
-Base.@pure FusionStyle(::Type{CU1Irrep}) = SimpleNonAbelian()
+FusionStyle(::Type{CU1Irrep}) = SimpleNonAbelian()
 ...</code></pre><p>The rest of the implementation can be read in the source code, but is rather long due to all the different cases for the arguments of <code>Fsymbol</code>.</p><p>So far, no sectors have been implemented with <code>FusionStyle(G) == DegenerateNonAbelian()</code>, though an example would be the representation theory of <span>$\mathsf{SU}_N$</span>, i.e. represented by the group <code>SU{N}</code>, for <code>N&gt;2</code>. Such sectors are not yet fully supported; certain operations remain to be implemented. Furthermore, the topological data of the representation theory of such groups is not readily available and needs to be computed.</p><h3 id="sss_productsectors"><a class="docs-heading-anchor" href="#sss_productsectors">Combining different sectors</a><a id="sss_productsectors-1"></a><a class="docs-heading-anchor-permalink" href="#sss_productsectors" title="Permalink"></a></h3><p>It is also possible to define two or more different types of symmetries, e.g. when the total symmetry group is a direct product of individual simple groups. Such sectors are obtained using the binary operator <code>⊠</code>, which can be entered as <code>\boxtimes</code>+TAB. First some examples</p><pre><code class="language-julia-repl">julia&gt; a = Z3Irrep(1) ⊠ Irrep[U₁](1)
 (Irrep[ℤ₃](1) ⊠ Irrep[U₁](1))
 
@@ -288,7 +292,7 @@ Base.getindex(::TensorKit.SectorValues{I}, i::Int) = ...
 TensorKit.findindex(::TensorKit.SectorValues{I}, c::I) = ...</code></pre><p>Additionally, suitable definitions can be given for</p><pre><code class="language-julia">TensorKit.dim(a::I) = ...
 TensorKit.frobeniusschur(a::I) = ...
 TensorKit.Bsymbol(a::I, b::I, c::I) = ...</code></pre><p>Out of these, we have not yet encountered the Frobenius-Schur indicator and the B-symbol. They were both defined in the section on <a href="../categories/#ss_topologicalfusion">topological data of fusion categories</a> and are fully determined by the F-symbol, just like the quantum dimensions. Hence, there is a default implementation for each of these three functions that just relies on <code>Fsymbol</code>, and alternative definitions need to be given only if a more efficient version is available.</p><p>If <code>FusionStyle(I) == DegenerateNonAbelian()</code>, then the multiple outputs <code>c</code> in the tensor product of <code>a</code> and <code>b</code> will be labeled as <code>i=1</code>, <code>2</code>, …, <code>Nsymbol(a,b,c)</code>. Optionally, a different label can be provided by defining</p><pre><code class="language-julia">TensorKit.vertex_ind2label(i::Int, a::I, b::I, c::I) = ...
-# some label, e.g. a `Char` or `Symbol`</code></pre><p>The following function will then automatically determine the corresponding label type (which should not vary, i.e. <code>vertex_ind2label</code> should be type stable)</p><pre><code class="language-julia">Base.@pure vertex_labeltype(I::Type{&lt;:Sector}) =
+# some label, e.g. a `Char` or `Symbol`</code></pre><p>The following function will then automatically determine the corresponding label type (which should not vary, i.e. <code>vertex_ind2label</code> should be type stable)</p><pre><code class="language-julia">vertex_labeltype(I::Type{&lt;:Sector}) =
     typeof(vertex_ind2label(1, one(I), one(I), one(I)))</code></pre><p>The following type, which already appeared in the implementation of <code>SU2Irrep</code> above, can be useful for providing the return type of <code>a ⊗ b</code></p><pre><code class="language-julia">struct SectorSet{I&lt;:Sector,F,S}
     f::F
     set::S
@@ -517,10 +521,10 @@ julia&gt; length(iter)
 1430
 
 julia&gt; @elapsed sum(n-&gt;1, iter)
-0.032655466
+0.024680687
 
 julia&gt; @elapsed length(iter)
-8.78e-5
+6.0e-5
 
 julia&gt; s2 = s ⊠ s
 (Irrep[SU₂](1/2) ⊠ Irrep[SU₂](1/2))
@@ -673,4 +677,4 @@ julia&gt; Rsymbol(τ,τ,τ) |&gt; polar
 (1//1, -3//10)
 
 julia&gt; twist(τ) |&gt; polar
-(1//1, -2//5)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../spaces/">« Vector spaces</a><a class="docs-footer-nextpage" href="../tensors/">Tensors and the <code>TensorMap</code> type »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 22 October 2020 22:50">Thursday 22 October 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+(1//1, -2//5)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../spaces/">« Vector spaces</a><a class="docs-footer-nextpage" href="../tensors/">Tensors and the <code>TensorMap</code> type »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 23 October 2020 00:05">Friday 23 October 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
